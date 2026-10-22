@@ -1,0 +1,6 @@
+{
+  "name": "Diploma Quest",
+  "description": "An offline, gamified learning map and skill assessment tracker for the institute's Intermediate Diploma, Advanced Diploma, TOEFL, and PTP curriculum with teacher unlock codes, on-demand level resource caching, local classroom grading, and unit badges.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

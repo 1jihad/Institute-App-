@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Diploma Quest</string>
+    <string name="map_tab">Adventure Map</string>
+    <string name="badges_tab">Unit Badges</string>
+    <string name="storage_tab">Offline Packs</string>
+    <string name="poster_tab">Institute Map</string>
+    <string name="unlock_level_title">Enter Teacher Unlock Code</string>
+    <string name="unlock_level_subtitle">Ask your teacher for the secret level password when you start or pass a class unit!</string>
+    <string name="download_content">Download Content</string>
+    <string name="delete_offline_pack">Remove Offline Pack</string>
+    <string name="record_class_grade">Save In-Class Grade</string>
+    <string name="teacher_codes_helper">Teacher Code Guide</string>
+    <string name="official_poster_title">Official Institute Learning Map</string>
+</resources>

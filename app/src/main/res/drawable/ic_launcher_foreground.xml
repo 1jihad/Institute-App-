@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group
+        android:scaleX="0.52"
+        android:scaleY="0.52"
+        android:translateX="5.76"
+        android:translateY="5.76">
+        <!-- Graduation Cap & Shield Star Emblem -->
+        <path
+            android:fillColor="#FBBF24"
+            android:pathData="M12,3L1,9L12,15L21,10.09V17H23V9M5,13.18V17.18L12,21L19,17.18V13.18L12,17L5,13.18Z" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M12,6.2L13.09,8.41L15.5,8.76L13.75,10.47L14.16,12.88L12,11.74L9.84,12.88L10.25,10.47L8.5,8.76L10.91,8.41L12,6.2Z" />
+    </group>
+</vector>
