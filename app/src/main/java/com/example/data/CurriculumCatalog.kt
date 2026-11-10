@@ -8,6 +8,7 @@ object CurriculumCatalog {
         val track: DiplomaTrack,
         val stageGroup: String,
         val title: String,
+        val boxType: BoxArchitectureType,
         val hours: Int,
         val code: String,
         val sizeMb: Float,
@@ -16,727 +17,1199 @@ object CurriculumCatalog {
         val badgeDesc: String,
         val skills: List<String>,
         val topicFocus: String,
-        val vocab: List<Pair<String, String>>,
+        val vocab: List<VocabWordItem>,
         val grammarRule: String,
+        val grammarFormula: String,
+        val affirmativeExamples: List<String>,
+        val negativeExamples: List<String>,
+        val questionExamples: List<String>,
+        val nominalVsVerbalNotes: List<Pair<String, String>> = emptyList(),
         val assignmentTask: String,
-        val quiz: List<SkillQuizQuestion>
+        val vocabPractice: List<SkillQuizQuestion>,
+        val grammarPractice: List<SkillQuizQuestion>,
+        val rwExercises: List<SentenceBuildExercise> = emptyList(),
+        val listeningExercises: List<ListeningDictationExercise> = emptyList(),
+        val speakingPrompts: List<SpeakingVoicePrompt> = emptyList()
     )
 
     private val seeds = listOf(
-        // === INTERMEDIATE DIPLOMA: STAGE 1 (Levels 1-6) ===
+        // === BOX 1: Essence (General - 4 Rooms) ===
         LevelSeed(
             id = "lvl_01_essence",
             order = 1,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 1 • Foundation Block",
+            stageGroup = "Stage 1 • Foundation Block (Boxes 1–4)",
             title = "Essence",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "ESS-101",
             sizeMb = 11.4f,
             badgeName = "Alphabet & Phonics Spark",
             emoji = "🌟",
-            badgeDesc = "Mastered the core sounds, greetings, numbers, and everyday survival expressions in Essence (45 Hrs).",
-            skills = listOf("Phonics", "Greetings", "Core Vocabulary", "Listening"),
-            topicFocus = "Alphabet phonics, self-introductions, numbers 1–100, and classroom phrases.",
+            badgeDesc = "Mastered core phonics, survival greetings, numbers, and Verb To Be in Box 1: Essence.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Alphabet phonics, self-introductions, numbers 1–100, and classroom survival phrases.",
             vocab = listOf(
-                "Good morning! How are you?" to "A friendly greeting used before noon.",
-                "Nice to meet you" to "Said when meeting someone for the first time.",
-                "Could you repeat that, please?" to "Polite classroom phrase to ask for help.",
-                "Spell your name" to "Say each letter of your name in order."
+                VocabWordItem("v1_1", "Good morning! How are you?", "A friendly greeting used before noon.", "صباح الخير! كيف حالك؟", "Good morning! How are you feeling today?", "Greeting"),
+                VocabWordItem("v1_2", "Nice to meet you", "Said when meeting someone for the first time.", "تشرفت بمعرفتك", "Hello Sara, it is very nice to meet you.", "Phrase"),
+                VocabWordItem("v1_3", "Could you repeat that, please?", "Polite classroom phrase asking the teacher to say something again.", "هل يمكنك إعادة ذلك من فضلك؟", "Excuse me teacher, could you repeat that, please?", "Classroom"),
+                VocabWordItem("v1_4", "Spell your name", "Say each letter of your name in order.", "تهجّى اسمك", "Can you spell your last name for the registration form?", "Verb Phrase"),
+                VocabWordItem("v1_5", "Notebook and dictionary", "Essential study tools for recording new English words.", "دفتر ملاحظات وقاموس", "I always bring my notebook and dictionary to class.", "Noun")
             ),
-            grammarRule = "Subject Pronouns (I, You, We, They, He, She, It) + Verb 'To Be' (am / is / are). Example: 'I am a student. She is my teacher.'",
-            assignmentTask = "Introduce yourself to 3 classmates in English: share your name, age, favorite color, and spell your last name aloud.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Choose the correct verb: 'She ___ my English teacher.'", listOf("am", "is", "are", "be"), 1, "'She' takes the singular verb 'is'."),
-                SkillQuizQuestion("q2", "What do you say when you meet a new classmate?", listOf("Goodbye forever", "Nice to meet you!", "See you yesterday", "Sleep well"), 1, "'Nice to meet you!' is the standard friendly greeting."),
-                SkillQuizQuestion("q3", "Which word starts with a vowel sound?", listOf("Book", "Apple", "Pencil", "Chair"), 1, "'Apple' starts with the vowel 'A'.")
+            grammarRule = "Subject Pronouns (I, You, We, They, He, She, It) + Verb 'To Be' (am / is / are) to identify people, places, and states.",
+            grammarFormula = "Subject + am / is / are + Complement",
+            affirmativeExamples = listOf("I am a new student at Excel ETA.", "She is our English teacher.", "They are in Room 1 today."),
+            negativeExamples = listOf("I am not late for class.", "He is not from London.", "We are not tired."),
+            questionExamples = listOf("Are you ready for the lesson?", "Is she in the Beginner class?", "Where are your books?"),
+            assignmentTask = "Introduce yourself in English: state your full name, academic goal, and spell your surname aloud.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp1_1", "What do you say when you meet a classmate for the first time?", listOf("Goodbye forever", "Nice to meet you!", "See you yesterday", "Close the door"), 1, "'Nice to meet you!' is used when meeting someone new."),
+                SkillQuizQuestion("vp1_2", "Which classroom phrase politely asks the teacher to say a word again?", listOf("Could you repeat that, please?", "Where is the exit?", "I am hungry", "Give me a pen"), 0, "'Could you repeat that, please?' is the polite request for repetition."),
+                SkillQuizQuestion("vp1_3", "What does 'Spell your name' mean?", listOf("Write your age", "Say each letter of your name in order", "Whisper quietly", "Leave the room"), 1, "Spelling means saying or writing each letter in sequence.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp1_1", "Choose the correct verb: 'She ___ my English teacher.'", listOf("am", "is", "are", "be"), 1, "Singular pronoun 'She' takes 'is'."),
+                SkillQuizQuestion("gp1_2", "Complete the negative sentence: 'We ___ late for class today.'", listOf("is not", "am not", "are not", "be not"), 2, "Plural pronoun 'We' takes 'are not'."),
+                SkillQuizQuestion("gp1_3", "Choose the correct question form: '___ you a student at Excel ETA?'", listOf("Is", "Am", "Are", "Be"), 2, "Use 'Are' with the pronoun 'you'.")
             )
         ),
+
+        // === BOX 2: Beginner A (General - 4 Rooms) ===
         LevelSeed(
             id = "lvl_02_beginner_a",
             order = 2,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 1 • Foundation Block",
+            stageGroup = "Stage 1 • Foundation Block (Boxes 1–4)",
             title = "Beginner A",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "BEGA-102",
             sizeMb = 12.8f,
             badgeName = "Beginner A Explorer",
             emoji = "🧭",
-            badgeDesc = "Completed 45 hours of Beginner A: daily routines, family trees, and present simple sentences.",
-            skills = listOf("Present Simple", "Daily Routines", "Family", "Reading"),
-            topicFocus = "Talking about family members, daily schedules, telling time, and favorite hobbies.",
+            badgeDesc = "Completed Box 2 (Beginner A): daily routines, family relationships, and Present Simple.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Daily routines, family members, telling time, and Present Simple habits.",
             vocab = listOf(
-                "Wake up early" to "Stop sleeping in the morning.",
-                "Brush my teeth" to "Clean teeth with a toothbrush.",
-                "Grandparents" to "The parents of your father or mother.",
-                "Every weekend" to "Happening on Saturdays and Sundays."
+                VocabWordItem("v2_1", "Wake up early", "Stop sleeping in the morning.", "يستيقظ مبكراً", "I wake up early at 6:30 AM every weekday.", "Verb Phrase"),
+                VocabWordItem("v2_2", "Brush my teeth", "Clean teeth with a toothbrush.", "أفرش أسناني", "She brushes her teeth after breakfast.", "Routine"),
+                VocabWordItem("v2_3", "Grandparents", "The parents of your father or mother.", "الأجداد", "We visit our grandparents every Friday.", "Noun"),
+                VocabWordItem("v2_4", "Every weekend", "Happening on Saturdays and Sundays.", "كل عطلة نهاية أسبوع", "They play football every weekend.", "Time Phrase")
             ),
-            grammarRule = "Present Simple for habits: Add '-s' or '-es' for He/She/It. Example: 'I play soccer, but he plays basketball.'",
-            assignmentTask = "Draw and label your Morning Routine timeline with 5 sentences using time expressions (at 7:00 AM, in the afternoon).",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Complete the sentence: 'My brother ___ breakfast at 7:30 AM.'", listOf("eat", "eats", "eating", "to eat"), 1, "For 'he/she/it' (my brother), add -s to the verb."),
-                SkillQuizQuestion("q2", "Which preposition goes with clock times? 'Class starts ___ 9 o'clock.'", listOf("on", "in", "at", "by"), 2, "Use 'at' for specific clock times."),
-                SkillQuizQuestion("q3", "Who is your mother's brother?", listOf("Cousin", "Uncle", "Nephew", "Grandfather"), 1, "Your mother's or father's brother is your uncle.")
+            grammarRule = "Present Simple for daily habits and facts. Add '-s' or '-es' to the verb with He, She, and It.",
+            grammarFormula = "I/You/We/They + Base Verb | He/She/It + Verb(-s/-es)",
+            affirmativeExamples = listOf("I study English every evening.", "He watches educational videos at night.", "She goes to the institute at 4:00 PM."),
+            negativeExamples = listOf("I do not drink coffee at night.", "He does not wake up late.", "They do not miss their classes."),
+            questionExamples = listOf("Do you practice vocabulary every day?", "Does she live near the institute?", "What time does the lesson start?"),
+            assignmentTask = "Write 5 sentences describing your daily routine using time prepositions (at 7:00 AM, in the morning).",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp2_1", "Who are your father's or mother's parents?", listOf("Cousins", "Grandparents", "Neighbors", "Classmates"), 1, "Your parents' parents are your grandparents."),
+                SkillQuizQuestion("vp2_2", "Which phrase means 'stop sleeping in the morning'?", listOf("Wake up early", "Go to bed", "Eat dinner", "Close the book"), 0, "'Wake up early' means getting out of sleep in the morning."),
+                SkillQuizQuestion("vp2_3", "Which preposition goes with clock times? 'Class starts ___ 9:00 o'clock.'", listOf("on", "in", "at", "by"), 2, "Use 'at' before specific clock times.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp2_1", "Complete the sentence: 'My brother ___ breakfast at 7:30 AM.'", listOf("eat", "eats", "eating", "to eat"), 1, "With 'My brother' (he), add -s to the verb: 'eats'."),
+                SkillQuizQuestion("gp2_2", "Choose the correct negative: 'Sara ___ like loud music.'", listOf("don't", "doesn't", "isn't", "not"), 1, "Singular subject 'Sara' takes 'doesn't + base verb'."),
+                SkillQuizQuestion("gp2_3", "Complete the question: '___ they study together on Mondays?'", listOf("Does", "Do", "Are", "Is"), 1, "Use 'Do' with 'they' in Present Simple questions.")
             )
         ),
+
+        // === BOX 3: Beginner B (General - 4 Rooms) ===
         LevelSeed(
             id = "lvl_03_beginner_b",
             order = 3,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 1 • Foundation Block",
+            stageGroup = "Stage 1 • Foundation Block (Boxes 1–4)",
             title = "Beginner B",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "BEGB-103",
             sizeMb = 13.5f,
             badgeName = "Town & Market Navigator",
             emoji = "🏘️",
-            badgeDesc = "Conquered Beginner B (45 Hrs): shopping, food countable/uncountable nouns, and asking for directions.",
-            skills = listOf("Directions", "Countable Nouns", "Shopping", "Speaking"),
-            topicFocus = "Places around town, ordering food, countable & uncountable nouns, and Present Continuous.",
+            badgeDesc = "Conquered Box 3 (Beginner B): shopping, countable/uncountable nouns, and Present Continuous.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Places around town, shopping, countable/uncountable nouns, and Present Continuous actions.",
             vocab = listOf(
-                "Turn left at the corner" to "Change direction to the left side of the street.",
-                "Across from the library" to "On the opposite side of the road from the library.",
-                "A loaf of bread" to "A measured unit for uncountable bread.",
-                "How much does this cost?" to "Asking for the price of an item."
+                VocabWordItem("v3_1", "Turn left at the corner", "Change direction to the left side of the street.", "انعطف يساراً عند الزاوية", "Walk straight and turn left at the corner.", "Directions"),
+                VocabWordItem("v3_2", "Across from the library", "On the opposite side of the street from the library.", "مقابل المكتبة", "The café is across from the library.", "Preposition"),
+                VocabWordItem("v3_3", "A loaf of bread", "A measured unit for uncountable bread.", "رغيف خبز", "Please buy a loaf of bread from the bakery.", "Noun Phrase"),
+                VocabWordItem("v3_4", "How much does this cost?", "Asking for the price of an item.", "كم سعر هذا؟", "Excuse me, how much does this dictionary cost?", "Shopping")
             ),
-            grammarRule = "Use 'There is / some / much' for uncountable nouns (water, milk) and 'There are / many / a few' for countable plurals (apples, books).",
-            assignmentTask = "Roleplay a Market Buyer & Seller dialogue with a partner using a 5-item grocery list and present prices to the teacher.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Which question is correct for uncountable water?", listOf("How many water is there?", "How much water is in the bottle?", "Are there a water?", "How few water?"), 1, "Water is uncountable, so we use 'How much'."),
-                SkillQuizQuestion("q2", "Look! The children ___ in the playground right now.", listOf("runs", "are running", "ran", "is running"), 1, "'Right now' signals Present Continuous ('are running')."),
-                SkillQuizQuestion("q3", "Where do you go to borrow books?", listOf("Bakery", "Pharmacy", "Library", "Station"), 2, "You borrow books from a library.")
+            grammarRule = "Countable vs. Uncountable Nouns ('How many' for countable plurals; 'How much' for uncountable nouns) & Present Continuous for actions happening right now.",
+            grammarFormula = "How many + Plural Noun | How much + Uncountable Noun | am/is/are + Verb-ing",
+            affirmativeExamples = listOf("There are many books on the shelf.", "There is some water in the bottle.", "Look! The students are reading right now."),
+            negativeExamples = listOf("There aren't any apples left.", "There isn't much sugar in my tea.", "He isn't watching TV right now."),
+            questionExamples = listOf("How many notebooks do you need?", "How much milk is in the fridge?", "What are you doing at the moment?"),
+            assignmentTask = "Write a 6-line shopping dialogue using 'How much', 'How many', and Present Continuous.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp3_1", "Where do you go to borrow or read books?", listOf("Bakery", "Pharmacy", "Library", "Airport"), 2, "A library is where you borrow and read books."),
+                SkillQuizQuestion("vp3_2", "What do you ask when you want to know the price of a jacket?", listOf("How tall is it?", "How much does this cost?", "Where is the bank?", "What time is it?"), 1, "'How much does this cost?' asks for the price."),
+                SkillQuizQuestion("vp3_3", "Which phrase means 'on the opposite side of the street'?", listOf("Across from", "Inside of", "Underneath", "Behind the"), 0, "'Across from' means on the opposite side.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp3_1", "Which question is correct for uncountable water?", listOf("How many water is there?", "How much water is in the bottle?", "Are there a water?", "How few water?"), 1, "Water is uncountable, so we use 'How much'."),
+                SkillQuizQuestion("gp3_2", "Look! The children ___ in the courtyard right now.", listOf("runs", "are running", "ran", "is running"), 1, "'Right now' requires Present Continuous: 'are running'."),
+                SkillQuizQuestion("gp3_3", "Choose the correct quantifier: 'There aren't ___ chairs in the hall.'", listOf("much", "a little", "many", "some"), 2, "Use 'many' with plural countable nouns ('chairs') in negatives.")
             )
         ),
+
+        // === BOX 4: Skills 1 RW (Reading & Writing Skills - 2 Specialized Rooms) ===
         LevelSeed(
             id = "lvl_04_skills_rw_1",
             order = 4,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 1 • Foundation Block",
-            title = "Skills (R&W)",
+            stageGroup = "Stage 1 • Foundation Block (Boxes 1–4)",
+            title = "Skills 1 RW",
+            boxType = BoxArchitectureType.SKILLS_RW_2_ROOMS,
             hours = 45,
             code = "SRW1-104",
             sizeMb = 14.2f,
-            badgeName = "Story Reader & Scribe I",
-            emoji = "📖",
-            badgeDesc = "Finished Skills (Reading & Writing) 45 Hrs: paragraph structure, scanning stories, and punctuation mastery.",
-            skills = listOf("Reading Comprehension", "Paragraph Writing", "Punctuation", "Main Ideas"),
-            topicFocus = "Finding main ideas in short stories, topic sentences, linking words (and, but, because, so), and writing clear paragraphs.",
+            badgeName = "Sentence Architect I",
+            emoji = "✍️",
+            badgeDesc = "Mastered Box 4 (Skills 1 RW): Past Continuous, Nominal & Verbal sentence formation, and sentence reordering.",
+            skills = listOf("Grammar Explanation Room", "Writing & Sentence Construction Room"),
+            topicFocus = "Past Continuous vs. Past Simple, Nominal vs. Verbal Sentence Structure, and Sentence Reordering.",
             vocab = listOf(
-                "Topic Sentence" to "The first sentence that tells the main idea of a paragraph.",
-                "Supporting Details" to "Facts or examples that explain the main idea.",
-                "Skimming" to "Reading quickly to understand the general topic.",
-                "Scanning" to "Looking through text quickly to find a specific name or number."
+                VocabWordItem("v4_1", "While I was studying", "Indicates an ongoing background action in the past.", "بينما كنت أدرس", "While I was studying, the phone rang.", "Time Clause"),
+                VocabWordItem("v4_2", "Nominal Sentence (State/Identity)", "A sentence centered on Subject + Be + Noun/Adjective describing state or identity.", "الجملة الاسمية (مبتدأ وخبر / وصف حالة)", "The classroom is bright and quiet.", "Syntax"),
+                VocabWordItem("v4_3", "Verbal Sentence (Action)", "A sentence driven by an action verb performed by the subject.", "الجملة الفعلية (فعل وفاعل ومفعول)", "The students wrote three paragraphs carefully.", "Syntax"),
+                VocabWordItem("v4_4", "Suddenly", "Happening quickly and unexpectedly (triggers Past Simple).", "فجأة", "We were walking home when suddenly it started to rain.", "Adverb")
             ),
-            grammarRule = "Compound Sentences: Connect two ideas with 'and' (addition), 'but' (contrast), 'because' (reason), or 'so' (result).",
-            assignmentTask = "Read the short story 'The Lost Kite' and write a 6-sentence paragraph about your favorite childhood toy with a clear topic sentence.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Choose the best connector: 'I wanted to play outside, ___ it started to rain.'", listOf("because", "but", "so", "or"), 1, "'But' shows contrast between wanting to play and rain."),
-                SkillQuizQuestion("q2", "What is 'scanning' when reading a text?", listOf("Reading every word aloud", "Looking quickly for a specific piece of info like a date", "Closing the book", "Writing a summary"), 1, "Scanning means searching rapidly for specific details."),
-                SkillQuizQuestion("q3", "Which part of a paragraph introduces the main idea?", listOf("Title page", "Topic sentence", "Footnote", "Bibliography"), 1, "The topic sentence introduces the main idea.")
+            grammarRule = "1) Past Continuous (was/were + V-ing) describes an ongoing action in the past interrupted by a shorter action (Past Simple). 2) Sentence Architecture: Nominal Sentences describe state/identity using Subject + Verb To Be + Complement, whereas Verbal Sentences express dynamic actions using Subject + Action Verb + Object.",
+            grammarFormula = "Past Continuous: Subject + was/were + Verb-ing | While + Past Continuous, Past Simple",
+            affirmativeExamples = listOf(
+                "Nominal Structure: The library is a quiet place for reading.",
+                "Verbal Structure: The students completed the reading worksheet.",
+                "Past Continuous: I was reading a story when my friend arrived."
+            ),
+            negativeExamples = listOf(
+                "He was not sleeping at 9:00 PM; he was writing his essay.",
+                "They were not making noise during the exam."
+            ),
+            questionExamples = listOf(
+                "What were you doing when the teacher entered the room?",
+                "Was she studying in the library yesterday evening?"
+            ),
+            nominalVsVerbalNotes = listOf(
+                "Nominal Sentence (بناء الجملة الاسمية بالإنجليزية)" to "Starts with the Subject followed by a linking verb (am/is/are/was/were) + Noun or Adjective complement. Example: 'English grammar is logical.'",
+                "Verbal Sentence (بناء الجملة الفعلية بالإنجليزية)" to "Starts with the Subject followed by a dynamic Action Verb + Object/Adverb. Example: 'The student solved the grammar exercise quickly.'",
+                "Past Continuous (الماضي المستمر)" to "Use 'was/were + verb-ing' for longer background actions: 'While we were writing the paragraph, the bell rang.'"
+            ),
+            assignmentTask = "Construct 3 Nominal sentences, 3 Verbal action sentences, and 3 Past Continuous sentences using 'while' and 'when'.",
+            vocabPractice = emptyList(),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp4_1", "Complete with Past Continuous: 'While Sara ___ her essay, the lights went out.'", listOf("wrote", "was writing", "were writing", "writes"), 1, "Singular subject 'Sara' after 'While' takes 'was writing'."),
+                SkillQuizQuestion("gp4_2", "Which of the following represents a Nominal-style state sentence (Subject + Be + Complement)?", listOf("The teacher explained the lesson.", "The final exam is very important.", "We wrote five sentences.", "They ran to the bus."), 1, "'The final exam is very important' links the subject to an adjective complement using 'is'."),
+                SkillQuizQuestion("gp4_3", "Choose the correct sentence order:", listOf("Was studying he English yesterday.", "He was studying English at 8 PM yesterday.", "Studying was he English yesterday.", "Yesterday at 8 PM studying he was."), 1, "Standard English word order is Subject + Auxiliary + Main Verb + Object + Time.")
+            ),
+            rwExercises = listOf(
+                SentenceBuildExercise(
+                    id = "rw1_ex1",
+                    instruction = "Reorder the words to form a Past Continuous sentence with 'while':",
+                    sentenceTypeTag = "Past Continuous (الماضي المستمر)",
+                    scrambledWords = listOf("studying", "While", "I", "was", "my", "called", "brother"),
+                    targetSentence = "While I was studying my brother called",
+                    grammarHint = "Start with 'While + Subject + was/were + V-ing', followed by the Past Simple clause."
+                ),
+                SentenceBuildExercise(
+                    id = "rw1_ex2",
+                    instruction = "Form a Nominal State Sentence (جملة اسمية وصفية) describing the course:",
+                    sentenceTypeTag = "Nominal Sentence (جملة اسمية)",
+                    scrambledWords = listOf("is", "beneficial", "very", "Reading", "daily"),
+                    targetSentence = "Reading daily is very beneficial",
+                    grammarHint = "Place the Subject ('Reading daily') first, then the linking verb ('is'), then the modifier + adjective ('very beneficial')."
+                ),
+                SentenceBuildExercise(
+                    id = "rw1_ex3",
+                    instruction = "Form a Verbal Action Sentence (جملة فعلية) in the past tense:",
+                    sentenceTypeTag = "Verbal Sentence (جملة فعلية)",
+                    scrambledWords = listOf("carefully", "wrote", "The", "students", "paragraphs", "their"),
+                    targetSentence = "The students wrote their paragraphs carefully",
+                    grammarHint = "Follow Subject ('The students') + Action Verb ('wrote') + Object ('their paragraphs') + Adverb ('carefully')."
+                ),
+                SentenceBuildExercise(
+                    id = "rw1_ex4",
+                    instruction = "Reorder to build a Past Continuous question:",
+                    sentenceTypeTag = "Past Continuous Question",
+                    scrambledWords = listOf("doing", "What", "you", "were", "yesterday", "evening"),
+                    targetSentence = "What were you doing yesterday evening",
+                    grammarHint = "Question word ('What') + were + Subject ('you') + Verb-ing ('doing') + time."
+                )
             )
         ),
+
+        // === BOX 5: Elementary A (General - 4 Rooms) ===
         LevelSeed(
             id = "lvl_05_elementary_a",
             order = 5,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 1 • Foundation Block",
+            stageGroup = "Stage 2 • Elementary Block (Boxes 5–7)",
             title = "Elementary A",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "ELEA-105",
-            sizeMb = 14.9f,
-            badgeName = "Time Traveler: Past Simple",
+            sizeMb = 14.8f,
+            badgeName = "Past Storyteller",
             emoji = "⏳",
-            badgeDesc = "Mastered Elementary A (45 Hrs): regular and irregular Past Simple verbs, biographies, and memorable stories.",
-            skills = listOf("Past Simple", "Irregular Verbs", "Biographies", "Listening"),
-            topicFocus = "Talking about last weekend, historical inventors, regular (-ed) and irregular past verbs, and time markers (yesterday, ago).",
+            badgeDesc = "Completed Box 5 (Elementary A): Past Simple regular & irregular verbs, travel, and biographies.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Past Simple regular and irregular verbs, past holidays, and life events.",
             vocab = listOf(
-                "Discovered" to "Found something for the first time.",
-                "Two days ago" to "48 hours before today in the past.",
-                "Memorable trip" to "A journey worth remembering for a long time.",
-                "Checklist" to "A list of tasks to complete."
+                VocabWordItem("v5_1", "Booked a flight", "Reserved an airplane ticket in advance.", "حجز رحلة طيران", "We booked a flight to Cairo last month.", "Travel"),
+                VocabWordItem("v5_2", "Visited historical sites", "Went to see ancient monuments and museums.", "زار المواقع التاريخية", "The tourists visited historical sites in the old city.", "Phrase"),
+                VocabWordItem("v5_3", "Left my luggage", "Forgot or placed suitcases somewhere.", "تركت أمتعتي", "He left his luggage at the hotel reception.", "Travel"),
+                VocabWordItem("v5_4", "Two weeks ago", "A specific time in the past before now.", "قبل أسبوعين", "I passed my first assessment two weeks ago.", "Time Marker")
             ),
-            grammarRule = "Past Simple Questions & Negatives: Use 'did / didn't + base verb'. Example: 'Did you go to the museum? Yes, I went there yesterday.'",
-            assignmentTask = "Interview a family member or classmate about their best holiday and write 8 Past Simple sentences using at least 4 irregular verbs.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "What is the Past Simple form of 'buy'?", listOf("buyed", "bought", "brought", "buying"), 1, "'Bought' is the irregular past form of 'buy'."),
-                SkillQuizQuestion("q2", "Spot the correct question:", listOf("Did she went home?", "Did she go home?", "Went she home?", "Does she went home?"), 1, "After 'Did', always use the base form of the verb ('go')."),
-                SkillQuizQuestion("q3", "We ___ a great science documentary last night.", listOf("watch", "watched", "watching", "watches"), 1, "'Last night' requires Past Simple 'watched'.")
+            grammarRule = "Past Simple for completed actions in the past. Use '-ed' for regular verbs and special forms for irregular verbs (go -> went, buy -> bought). Use 'did not + base verb' in negatives.",
+            grammarFormula = "Subject + Verb-ed / Irregular Past | Negative: did not + Base Verb",
+            affirmativeExamples = listOf("We traveled to Alexandria last summer.", "She bought a new English dictionary yesterday."),
+            negativeExamples = listOf("I did not go to the mall yesterday.", "They did not forget their homework."),
+            questionExamples = listOf("Where did you spend your last holiday?", "Did he finish the assignment on time?"),
+            assignmentTask = "Write a 60-word paragraph about a memorable trip using at least 6 Past Simple verbs.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp5_1", "What does 'Booked a flight' mean?", listOf("Read a book on a plane", "Reserved an airplane ticket", "Missed the bus", "Packed a bag"), 1, "'Booked a flight' means reserved an airline ticket."),
+                SkillQuizQuestion("vp5_2", "Which time expression signals the Past Simple tense?", listOf("Two weeks ago", "Next month", "Right now", "Tomorrow morning"), 0, "'Ago' refers to a completed time in the past."),
+                SkillQuizQuestion("vp5_3", "What is 'luggage' when traveling?", listOf("Passports only", "Suitcases and travel bags", "Airplane seats", "Hotel keys"), 1, "Luggage refers to suitcases and bags.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp5_1", "What is the Past Simple form of 'go'?", listOf("goed", "went", "gone", "going"), 1, "'Went' is the irregular past tense of 'go'."),
+                SkillQuizQuestion("gp5_2", "Choose the correct negative sentence in the Past Simple:", listOf("She didn't went home.", "She didn't go home.", "She don't went home.", "She not went home."), 1, "After 'didn't', always use the base verb ('go')."),
+                SkillQuizQuestion("gp5_3", "Complete the question: 'Where ___ you buy that notebook?'", listOf("were", "did", "was", "do"), 1, "Use 'did' + subject + base verb for Past Simple questions.")
             )
         ),
+
+        // === BOX 6: Elementary B (General - 4 Rooms) ===
         LevelSeed(
             id = "lvl_06_elementary_b",
             order = 6,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 1 • Foundation Block",
+            stageGroup = "Stage 2 • Elementary Block (Boxes 5–7)",
             title = "Elementary B",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "ELEB-106",
-            sizeMb = 15.3f,
+            sizeMb = 15.1f,
             badgeName = "Comparison & Future Planner",
             emoji = "🚀",
-            badgeDesc = "Completed Elementary B (45 Hrs): comparatives, superlatives, and future plans with 'going to' & 'will'.",
-            skills = listOf("Comparatives", "Superlatives", "Future Plans", "Grammar"),
-            topicFocus = "Comparing cities and animals, superlatives (the fastest, the most exciting), and future ambitions using 'be going to'.",
+            badgeDesc = "Completed Box 6 (Elementary B): comparatives, superlatives, and future plans with 'going to'.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Comparatives & Superlatives, technology, weather, and future intentions with 'be going to'.",
             vocab = listOf(
-                "More comfortable than" to "Comparative form for long adjectives.",
-                "The tallest building" to "Superlative form comparing 3 or more items.",
-                "Ambitious goal" to "A big plan that takes effort to achieve.",
-                "Weather forecast" to "Prediction of tomorrow's weather."
+                VocabWordItem("v6_1", "More convenient than", "Easier and more practical in comparison.", "أكثر ملاءمة من", "Studying with flashcards is more convenient than carrying heavy books.", "Comparative"),
+                VocabWordItem("v6_2", "The most crowded", "Having the highest number of people.", "الأكثر ازدحاماً", "Downtown is the most crowded area in the evening.", "Superlative"),
+                VocabWordItem("v6_3", "Upgrade my skills", "Improve my knowledge and abilities.", "أطوّر مهاراتي", "I am going to upgrade my English skills this semester.", "Goal"),
+                VocabWordItem("v6_4", "Weather forecast", "Prediction of upcoming weather conditions.", "النشرة الجوية", "According to the weather forecast, it is going to rain tomorrow.", "Noun")
             ),
-            grammarRule = "Short adjectives add '-er / -est' (bigger, biggest). Long adjectives use 'more / the most' (more interesting, the most interesting).",
-            assignmentTask = "Compare three animals or gadgets in a neat comparison chart and present 6 comparative/superlative sentences in class.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "The cheetah is ___ land animal in the world.", listOf("faster than", "the fastest", "more fast", "most fast"), 1, "When comparing one animal to all others in the world, use the superlative 'the fastest'."),
-                SkillQuizQuestion("q2", "Look at those dark clouds! It ___ rain soon.", listOf("is going to", "was", "did", "going"), 0, "Use 'is going to' for predictions based on visible evidence."),
-                SkillQuizQuestion("q3", "What is the comparative form of 'good'?", listOf("gooder", "more good", "better", "best"), 2, "'Better' is the irregular comparative of 'good'.")
+            grammarRule = "1) Comparatives (-er / more ... than) compare two things; Superlatives (the -est / the most ...) compare three or more. 2) Use 'am/is/are + going to + base verb' for planned future intentions.",
+            grammarFormula = "Short Adj-er + than | more + Long Adj + than | am/is/are going to + Verb",
+            affirmativeExamples = listOf("This laptop is faster than my old one.", "Box 6 is more advanced than Box 1.", "We are going to practice speaking tonight."),
+            negativeExamples = listOf("Today is not colder than yesterday.", "He is not going to miss the review session."),
+            questionExamples = listOf("Which city is the largest in your country?", "What are you going to study this weekend?"),
+            assignmentTask = "Compare two devices you use daily and write 3 future study goals using 'am going to'.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp6_1", "What does 'Upgrade my skills' mean?", listOf("Forget what I learned", "Improve my abilities and knowledge", "Sell my books", "Cancel my class"), 1, "Upgrading skills means improving your abilities."),
+                SkillQuizQuestion("vp6_2", "Which phrase describes the place with the highest number of people?", listOf("The most crowded", "The quietest", "Smaller than", "Less expensive"), 0, "'The most crowded' means having the most people."),
+                SkillQuizQuestion("vp6_3", "What tells you if it will be sunny or rainy tomorrow?", listOf("A dictionary", "A weather forecast", "A receipt", "A timetable"), 1, "A weather forecast predicts upcoming weather.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp6_1", "Choose the correct comparative: 'An airplane is ___ than a train.'", listOf("fast", "faster", "fastest", "more fast"), 1, "One-syllable adjective 'fast' becomes 'faster than'."),
+                SkillQuizQuestion("gp6_2", "Choose the correct superlative: 'This is ___ book in the library.'", listOf("more interesting", "the most interesting", "interestinger", "most interest"), 1, "Long adjectives use 'the most + adjective'."),
+                SkillQuizQuestion("gp6_3", "Complete the future plan: 'They ___ going to take the test on Thursday.'", listOf("is", "am", "are", "be"), 2, "'They' takes 'are going to'.")
             )
         ),
 
-        // === INTERMEDIATE DIPLOMA: STAGE 2 (Levels 7-13) ===
+        // === BOX 7: Skills 2 (Listening & Speaking Skills - 2 Specialized Rooms) ===
         LevelSeed(
-            id = "lvl_07_skill_ls_1",
+            id = "lvl_07_skills_ls_2",
             order = 7,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 2 • Intermediate Core",
-            title = "Skill (L&S)",
+            stageGroup = "Stage 2 • Elementary Block (Boxes 5–7)",
+            title = "Skills 2",
+            boxType = BoxArchitectureType.SKILLS_LS_2_ROOMS,
             hours = 45,
-            code = "SLS1-107",
-            sizeMb = 18.0f,
-            badgeName = "Clear Voice Communicator I",
+            code = "SLS2-107",
+            sizeMb = 18.6f,
+            badgeName = "Active Listener & Speaker I",
             emoji = "🎙️",
-            badgeDesc = "Mastered Skill (Listening & Speaking) 45 Hrs: pronunciation intonation, active listening, and confident dialogues.",
-            skills = listOf("Pronunciation", "Active Listening", "Intonation", "Roleplay"),
-            topicFocus = "Listening for tone and key details, question intonation, word stress, and holding 2-minute natural conversations.",
+            badgeDesc = "Mastered Box 7 (Skills 2): real-time audio dictation, vocabulary extraction, and interactive voice Q&A.",
+            skills = listOf("Listening & Vocabulary Dictation Room", "Speaking & Voice Interaction Room"),
+            topicFocus = "Real-time audio dictation, vocabulary capture, and spoken Q&A with automated pronunciation verification.",
             vocab = listOf(
-                "Rising intonation" to "Voice pitch goes up at the end of Yes/No questions.",
-                "Follow-up question" to "A question that keeps a conversation going.",
-                "Key takeaway" to "The most important point from an audio clip.",
-                "Clarification" to "Making something easier to understand."
+                VocabWordItem("v7_1", "Could you speak a bit slower?", "Polite request when listening to fast speech.", "هل يمكنك التحدث ببطء أكثر قليلاً؟", "Excuse me, could you speak a bit slower so I can write the notes?", "Listening"),
+                VocabWordItem("v7_2", "Appointment", "A scheduled meeting at a specific time.", "موعد محدد", "I have a dentist appointment at four o'clock.", "Noun"),
+                VocabWordItem("v7_3", "Platform number three", "The specific area where a train departs.", "الرصيف رقم ثلاثة", "The express train leaves from platform number three.", "Travel"),
+                VocabWordItem("v7_4", "In my opinion", "Phrase used to introduce your personal view when speaking.", "في رأيي", "In my opinion, daily listening practice builds strong fluency.", "Speaking")
             ),
-            grammarRule = "Conversation Starters & Echo Questions: Use 'Really?', 'Did you?', and 'What happened next?' to show active listening.",
-            assignmentTask = "Perform a 2-minute live mini-interview with a classmate in front of the teacher using 4 follow-up questions.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "In English, voice pitch usually rises at the end of:", listOf("Normal statements", "Yes/No questions", "Commands", "Sad news"), 1, "Yes/No questions like 'Are you ready?' use rising intonation."),
-                SkillQuizQuestion("q2", "Which phrase politely asks a speaker to explain more?", listOf("Stop talking", "What do you mean by that?", "Never mind", "I don't care"), 1, "'What do you mean by that?' politely asks for clarification."),
-                SkillQuizQuestion("q3", "When listening to a train announcement, what should you listen for?", listOf("Platform number and departure time", "Every single adjective", "The speaker's favorite color", "Background music"), 0, "Selective listening focuses on key information like platform and time.")
+            grammarRule = "Spoken Question Intonation & Clear Sentence Framing: Answer questions in complete sentences using the tense of the question.",
+            grammarFormula = "Listen -> Transcribe Key Words -> Respond Aloud with Complete Sentence",
+            affirmativeExamples = listOf("I wake up at seven o'clock every morning.", "The train departs from platform three at noon."),
+            negativeExamples = listOf("I didn't catch the last word; could you repeat it?"),
+            questionExamples = listOf("What time do you usually start your study session?", "How do you travel to the institute?"),
+            assignmentTask = "Complete all 3 audio dictation passages and answer the 3 spoken voice prompts aloud.",
+            vocabPractice = emptyList(),
+            grammarPractice = emptyList(),
+            listeningExercises = listOf(
+                ListeningDictationExercise(
+                    id = "ls2_dict_1",
+                    title = "Passage 1 • Morning Study Routine",
+                    audioTranscript = "I always review my vocabulary cards before breakfast",
+                    hintText = "Listen for the frequency adverb ('always') and what is reviewed before breakfast.",
+                    keyWordsToExtract = listOf(
+                        "review" to "مراجعة / يراجع",
+                        "vocabulary cards" to "بطاقات المفردات"
+                    )
+                ),
+                ListeningDictationExercise(
+                    id = "ls2_dict_2",
+                    title = "Passage 2 • Train Station Announcement",
+                    audioTranscript = "The express train to London leaves from platform three",
+                    hintText = "Listen for the type of train, destination, and platform number.",
+                    keyWordsToExtract = listOf(
+                        "express train" to "القطار السريع",
+                        "platform" to "رصيف المحطة"
+                    )
+                ),
+                ListeningDictationExercise(
+                    id = "ls2_dict_3",
+                    title = "Passage 3 • Scheduling an Appointment",
+                    audioTranscript = "Please arrive fifteen minutes before your appointment",
+                    hintText = "How many minutes early should you arrive?",
+                    keyWordsToExtract = listOf(
+                        "arrive" to "يصل",
+                        "appointment" to "موعد"
+                    )
+                )
+            ),
+            speakingPrompts = listOf(
+                SpeakingVoicePrompt(
+                    id = "ls2_spk_1",
+                    questionAudioText = "What time do you usually wake up and what do you do first in the morning?",
+                    arabicPromptHint = "أجب بصوتك: متى تستيقظ عادةً وماذا تفعل أولاً في الصباح؟",
+                    sampleTargetAnswer = "I usually wake up at seven in the morning and brush my teeth",
+                    requiredKeywords = listOf("wake", "morning"),
+                    grammarFocusLabel = "Present Simple Routine"
+                ),
+                SpeakingVoicePrompt(
+                    id = "ls2_spk_2",
+                    questionAudioText = "How do you travel to the institute and how long does it take?",
+                    arabicPromptHint = "أجب بصوتك: كيف تذهب إلى المعهد وكم يستغرق الطريق؟",
+                    sampleTargetAnswer = "I go to the institute by bus and it takes twenty minutes",
+                    requiredKeywords = listOf("institute", "minutes"),
+                    grammarFocusLabel = "Transport & Duration"
+                ),
+                SpeakingVoicePrompt(
+                    id = "ls2_spk_3",
+                    questionAudioText = "What did you study in your English class yesterday?",
+                    arabicPromptHint = "أجب بصوتك: ماذا درست في حصة اللغة الإنجليزية بالأمس؟",
+                    sampleTargetAnswer = "Yesterday I studied new vocabulary and practiced speaking in class",
+                    requiredKeywords = listOf("studied", "vocabulary", "speaking"),
+                    grammarFocusLabel = "Past Simple Response"
+                )
             )
         ),
+
+        // === BOX 8: Pre-intermediate A (General - 4 Rooms) ===
         LevelSeed(
-            id = "lvl_08_pre_intermediate_a",
+            id = "lvl_08_pre_inter_a",
             order = 8,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 2 • Intermediate Core",
-            title = "Pre-Intermediate A",
+            stageGroup = "Stage 3 • Pre-Intermediate Block (Boxes 8–10)",
+            title = "Pre-intermediate A",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "PREA-108",
-            sizeMb = 15.8f,
-            badgeName = "Present Perfect Pioneer",
-            emoji = "🏅",
-            badgeDesc = "Completed Pre-Intermediate A (45 Hrs): life experiences with Present Perfect, 'for' vs 'since', and Past Continuous.",
-            skills = listOf("Present Perfect", "Past Continuous", "Life Experiences", "Storytelling"),
-            topicFocus = "Sharing life experiences (Have you ever...?), contrasting Present Perfect with Past Simple, and interrupted past actions.",
+            sizeMb = 15.6f,
+            badgeName = "Life Experience Explorer",
+            emoji = "🌍",
+            badgeDesc = "Completed Box 8 (Pre-intermediate A): Present Perfect experiences ('ever/never/already/yet').",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Present Perfect vs. Past Simple, life experiences, achievements, and workplace communication.",
             vocab = listOf(
-                "Have you ever...?" to "Asking about an experience at any time in someone's life.",
-                "Since last September" to "From a specific starting point in time until now.",
-                "For three hours" to "A duration or period of time.",
-                "While I was walking" to "Background action in Past Continuous."
+                VocabWordItem("v8_1", "Have you ever", "Asking about life experience at any time up to now.", "هل سبق لك أن...", "Have you ever given a presentation in English?", "Present Perfect"),
+                VocabWordItem("v8_2", "Achievement", "Something important succeeded in through effort.", "إنجاز", "Earning two stars in every box is a great achievement.", "Noun"),
+                VocabWordItem("v8_3", "Deadline", "The latest time or date by which a task must be completed.", "الموعد النهائي", "We finished the project before the Friday deadline.", "Workplace"),
+                VocabWordItem("v8_4", "Already and Yet", "'Already' for completed actions; 'yet' in negatives/questions.", "بالفعل / حتى الآن", "I have already completed Room 1, but I haven't taken the quiz yet.", "Adverbs")
             ),
-            grammarRule = "Present Perfect (have/has + past participle) connects past to present: 'I have lived here for 5 years.' Use Past Simple for finished times: 'I moved here in 2021.'",
-            assignmentTask = "Write a 'Two Truths and a Lie' experience card using 'I have...' and answer classmates' Past Simple detective questions.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "I have known my best friend ___ five years.", listOf("since", "for", "ago", "during"), 1, "Use 'for' with a duration of time ('five years')."),
-                SkillQuizQuestion("q2", "While we ___ dinner, the phone rang.", listOf("eat", "were eating", "have eaten", "eats"), 1, "'While' introduces a longer background action in Past Continuous ('were eating')."),
-                SkillQuizQuestion("q3", "Have you ___ ridden a camel in the desert?", listOf("never", "ever", "yet", "since"), 1, "In questions about life experience, use 'ever'.")
+            grammarRule = "Present Perfect (have/has + Past Participle) connects past experiences or actions to the present without a specific past time marker.",
+            grammarFormula = "Subject + have / has + Past Participle (V3)",
+            affirmativeExamples = listOf("I have visited three countries so far.", "She has already uploaded the vocabulary list."),
+            negativeExamples = listOf("We have not seen that documentary yet.", "He has never missed an English exam."),
+            questionExamples = listOf("Have you ever spoken to a native speaker?", "Has the teacher posted the grades yet?"),
+            assignmentTask = "Write 5 sentences about your academic achievements using 'have/has + V3' with 'already', 'never', and 'yet'.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp8_1", "What do we call the final date by which an assignment must be submitted?", listOf("A holiday", "A deadline", "A souvenir", "A recipe"), 1, "A 'deadline' is the final due date."),
+                SkillQuizQuestion("vp8_2", "Which word means something important you succeeded in doing?", listOf("Achievement", "Mistake", "Traffic", "Luggage"), 0, "An achievement is a successful result of effort."),
+                SkillQuizQuestion("vp8_3", "Which word is placed at the end of Present Perfect negative sentences?", listOf("already", "ever", "yet", "just"), 2, "'Yet' goes at the end of negatives and questions.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp8_1", "Complete with Present Perfect: 'She ___ already finished her grammar exercise.'", listOf("have", "has", "did", "was"), 1, "Singular subject 'She' takes 'has' + past participle."),
+                SkillQuizQuestion("gp8_2", "Choose the correct verb form: 'Have you ever ___ in public?'", listOf("speak", "spoke", "spoken", "speaking"), 2, "'Have you ever' requires the Past Participle (V3): 'spoken'."),
+                SkillQuizQuestion("gp8_3", "Why is 'I have seen him yesterday' incorrect?", listOf("Because 'yesterday' is a finished past time requiring Past Simple ('I saw him yesterday')", "Because 'seen' is present tense", "Because 'I' takes 'has'", "It is correct"), 0, "Finished time markers like 'yesterday' require Past Simple, not Present Perfect.")
             )
         ),
+
+        // === BOX 9: Pre-intermediate B (General - 4 Rooms) ===
         LevelSeed(
-            id = "lvl_09_pre_intermediate_b",
+            id = "lvl_09_pre_inter_b",
             order = 9,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 2 • Intermediate Core",
-            title = "Pre-Intermediate B",
+            stageGroup = "Stage 3 • Pre-Intermediate Block (Boxes 8–10)",
+            title = "Pre-intermediate B",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "PREB-109",
-            sizeMb = 16.1f,
-            badgeName = "Conditional & Modal Tactician",
-            emoji = "⚡",
-            badgeDesc = "Finished Pre-Intermediate B (45 Hrs): First Conditional, modal verbs of obligation, and passive voice basics.",
-            skills = listOf("First Conditional", "Modal Verbs", "Advice & Rules", "Vocabulary"),
-            topicFocus = "Giving advice (should/ought to), rules (must/have to), real future possibilities (First Conditional), and inventions.",
+            sizeMb = 16.0f,
+            badgeName = "Modal & Conditional Thinker",
+            emoji = "⚖️",
+            badgeDesc = "Completed Box 9 (Pre-intermediate B): Modals of obligation/advice and First Conditional.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Modals of advice & obligation (should, must, have to) and First Conditional ('If + Present, will + Verb').",
             vocab = listOf(
-                "Mustn't" to "Something is forbidden or not allowed.",
-                "Don't have to" to "Something is optional; not necessary.",
-                "Consequence" to "The result of an action.",
-                "Eco-friendly" to "Not harmful to the environment."
+                VocabWordItem("v9_1", "Must follow the rules", "Strong obligation or necessity.", "يجب اتباع القواعد", "Students must follow the institute rules during exams.", "Modal Phrase"),
+                VocabWordItem("v9_2", "Consequence", "A result or effect of an action or condition.", "نتيجة / عاقبة", "Think carefully about the consequences of your decision.", "Noun"),
+                VocabWordItem("v9_3", "Recommend", "Suggest something as good or suitable.", "يوصي بـ", "I strongly recommend reviewing your flashcards every night.", "Verb"),
+                VocabWordItem("v9_4", "As soon as", "Immediately at the moment something happens.", "بمجرد أن", "The next box unlocks as soon as you earn two stars.", "Conjunction")
             ),
-            grammarRule = "First Conditional: 'If + Present Simple, will + base verb'. Example: 'If we recycle more paper, we will save many trees.'",
-            assignmentTask = "Design a 'Green Classroom Charter' poster with 5 modal rules and 3 First Conditional promises.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "If you study hard every day, you ___ pass the level exam!", listOf("would", "will", "did", "have"), 1, "First Conditional uses 'If + Present Simple, will + base verb'."),
-                SkillQuizQuestion("q2", "Tomorrow is a holiday, so we ___ wake up early.", listOf("mustn't", "don't have to", "shouldn't to", "cannot"), 1, "'Don't have to' means there is no obligation."),
-                SkillQuizQuestion("q3", "You look tired. You ___ get some rest tonight.", listOf("should", "would", "mustn't", "did"), 0, "'Should' is used to give friendly advice.")
+            grammarRule = "1) Modals: 'should' for advice, 'must / have to' for obligation, 'don't have to' for lack of necessity. 2) First Conditional: 'If + Present Simple, will + Base Verb' for real future possibilities.",
+            grammarFormula = "If + Subject + Present Simple, Subject + will + Base Verb",
+            affirmativeExamples = listOf("If you earn two stars, you will unlock the next box.", "You should listen to the slow audio first."),
+            negativeExamples = listOf("If he doesn't hurry, he won't catch the bus.", "You don't have to memorize everything in one hour."),
+            questionExamples = listOf("What will you do if you pass the exam early?", "Should I write this down in my notebook?"),
+            assignmentTask = "Write 4 First Conditional sentences about your study plan and 3 pieces of advice using 'should'.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp9_1", "What does 'Recommend' mean?", listOf("Forbid", "Suggest something as helpful or good", "Break a rule", "Forget"), 1, "To recommend means to suggest something positively."),
+                SkillQuizQuestion("vp9_2", "Which phrase means 'immediately when something happens'?", listOf("As soon as", "Even though", "Instead of", "Because of"), 0, "'As soon as' means right at that moment."),
+                SkillQuizQuestion("vp9_3", "What is the result or effect of an action called?", listOf("A consequence", "A schedule", "A dictionary", "An accent"), 0, "A consequence is the result of an action.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp9_1", "Complete the First Conditional: 'If it ___ tomorrow, we will study indoors.'", listOf("rain", "rains", "will rain", "rained"), 1, "The 'If' clause uses Present Simple ('rains')."),
+                SkillQuizQuestion("gp9_2", "Which modal expresses friendly advice?", listOf("mustn't", "should", "had", "did"), 1, "'Should' is used to give advice."),
+                SkillQuizQuestion("gp9_3", "What does 'You don't have to bring a laptop' mean?", listOf("It is forbidden to bring a laptop", "It is not necessary to bring a laptop, but you can if you want", "You must bring a laptop", "Laptops are broken"), 1, "'Don't have to' means there is no obligation.")
             )
         ),
+
+        // === BOX 10: Skills 3 RW (Reading & Writing Skills - 2 Specialized Rooms) ===
         LevelSeed(
-            id = "lvl_10_skills_rw_2",
+            id = "lvl_10_skills_rw_3",
             order = 10,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 2 • Intermediate Core",
-            title = "Skills (R&W) II",
+            stageGroup = "Stage 3 • Pre-Intermediate Block (Boxes 8–10)",
+            title = "Skills 3 RW",
+            boxType = BoxArchitectureType.SKILLS_RW_2_ROOMS,
             hours = 45,
-            code = "SRW2-110",
-            sizeMb = 16.7f,
-            badgeName = "Essay Architect II",
-            emoji = "✍️",
-            badgeDesc = "Mastered Intermediate Skills (R&W) 45 Hrs: multi-paragraph essays, opinion writing, and inference reading.",
-            skills = listOf("Opinion Essays", "Inference", "Transition Words", "Proofreading"),
-            topicFocus = "Reading between the lines (making inferences), organizing a 3-paragraph opinion essay, and using transitions (However, Furthermore).",
+            code = "SRW3-110",
+            sizeMb = 16.4f,
+            badgeName = "Sentence Architect II",
+            emoji = "📝",
+            badgeDesc = "Mastered Box 10 (Skills 3 RW): complex clauses, nominal & verbal sentence transformations, and paragraph linking.",
+            skills = listOf("Grammar Explanation Room", "Writing & Sentence Construction Room"),
+            topicFocus = "Relative Clauses (who/which/that), Nominal vs. Verbal Sentence Transformation, and Paragraph Connectors.",
             vocab = listOf(
-                "Furthermore" to "In addition; used to add a strong supporting point.",
-                "On the other hand" to "Used to introduce a contrasting view.",
-                "In conclusion" to "Signals the final summary paragraph.",
-                "Inference" to "A conclusion reached based on evidence and reasoning."
+                VocabWordItem("v10_1", "Furthermore", "In addition; used to add a stronger supporting point in writing.", "علاوة على ذلك", "Regular reading expands vocabulary; furthermore, it improves writing style.", "Connector"),
+                VocabWordItem("v10_2", "Although", "In spite of the fact that; introduces a contrast clause.", "على الرغم من أن", "Although the test was challenging, all students passed.", "Conjunction"),
+                VocabWordItem("v10_3", "Relative Clause", "A clause starting with who, which, or that to define a noun.", "جملة الموصول (الذي / التي)", "The student who practices daily achieves the highest grade.", "Grammar"),
+                VocabWordItem("v10_4", "Topic Sentence", "The opening sentence that states the main idea of a paragraph.", "الجملة المفتتاحية للفقرة", "Every clear academic paragraph begins with a strong topic sentence.", "Writing")
             ),
-            grammarRule = "Paragraph Transitions: Always follow introductory transitions ('However,', 'Therefore,', 'For instance,') with a comma.",
-            assignmentTask = "Write a structured 150-word opinion essay on 'Why Learning a Second Language Opens Doors' with Introduction, Body, and Conclusion.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Which transition word adds another supporting reason?", listOf("However,", "Furthermore,", "Instead,", "Although"), 1, "'Furthermore,' adds an additional point to support your argument."),
-                SkillQuizQuestion("q2", "If a story says 'Sara opened her umbrella and put on boots', what can you infer?", listOf("It is raining outside", "It is a hot summer day", "She is going swimming", "She lost her shoes"), 0, "Umbrella and boots provide clues that it is raining."),
-                SkillQuizQuestion("q3", "Where does the thesis statement belong in a short essay?", listOf("In the introduction paragraph", "In the page margin", "Only in the title", "Nowhere"), 0, "The introduction presents the main thesis or opinion.")
+            grammarRule = "1) Combining sentences using Relative Clauses ('who' for people, 'which/that' for things) and Contrast Links ('although', 'however'). 2) Transforming between Nominal Descriptive Sentences (Subject + Be + Adjective/Noun) and Verbal Action Sentences (Subject + Action Verb + Adverb).",
+            grammarFormula = "Noun + who/which/that + Clause | Although + Subject + Verb, Main Clause",
+            affirmativeExamples = listOf(
+                "Nominal Focus: Her explanation was remarkably clear.",
+                "Verbal Focus: She explained the grammar rule clearly.",
+                "Relative Clause: The dictionary which I bought yesterday is very helpful."
+            ),
+            negativeExamples = listOf(
+                "Do not use a comma before 'that' in a defining relative clause.",
+                "Never use both 'although' and 'but' in the same sentence."
+            ),
+            questionExamples = listOf(
+                "How can we transform a verbal sentence into a nominal descriptive sentence?",
+                "Which relative pronoun refers to people?"
+            ),
+            nominalVsVerbalNotes = listOf(
+                "Nominal to Verbal Transformation" to "Nominal: 'His progress is rapid.' -> Verbal: 'He progresses rapidly.'",
+                "Combining with 'Who' & 'Which'" to "Instead of two short choppy sentences, link them: 'The teacher praised the student who completed all four rooms.'",
+                "Contrast Connectors ('Although' vs 'However')" to "'Although' joins two clauses in one sentence: 'Although it was late, I finished my notes.'"
+            ),
+            assignmentTask = "Complete all 4 sentence construction & reordering drills and write a 4-sentence paragraph using 'Although' and 'Furthermore'.",
+            vocabPractice = emptyList(),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp10_1", "Choose the correct relative pronoun: 'The instructor ___ taught us Box 10 was very supportive.'", listOf("which", "who", "where", "whose"), 1, "Use 'who' to refer to people ('The instructor')."),
+                SkillQuizQuestion("gp10_2", "Which sentence is grammatically correct?", listOf("Although it was raining, but we went to class.", "Although it was raining, we went to class.", "Despite it was raining, we went.", "However it was raining, we went."), 1, "In English, do not use 'but' after 'Although'."),
+                SkillQuizQuestion("gp10_3", "Which sentence is the Verbal (Action) equivalent of 'Their discussion was productive'?", listOf("They discussed the topic productively.", "Their productive discussion was good.", "The discussion is very productive.", "Productive was their discussion."), 0, "'They discussed the topic productively' uses the action verb 'discussed' + adverb 'productively'.")
+            ),
+            rwExercises = listOf(
+                SentenceBuildExercise(
+                    id = "rw3_ex1",
+                    instruction = "Reorder the words to build a complex sentence with 'Although':",
+                    sentenceTypeTag = "Contrast Clause (Although)",
+                    scrambledWords = listOf("difficult", "Although", "was", "the", "passed", "quiz", "we"),
+                    targetSentence = "Although the quiz was difficult we passed",
+                    grammarHint = "Start with 'Although + Subject + Verb + Adjective', then the main clause ('we passed')."
+                ),
+                SentenceBuildExercise(
+                    id = "rw3_ex2",
+                    instruction = "Build a sentence with a Relative Clause using 'who':",
+                    sentenceTypeTag = "Relative Clause (جملة الموصول)",
+                    scrambledWords = listOf("who", "Students", "daily", "succeed", "practice"),
+                    targetSentence = "Students who practice daily succeed",
+                    grammarHint = "Place 'who practice daily' right after the subject 'Students', followed by the main verb 'succeed'."
+                ),
+                SentenceBuildExercise(
+                    id = "rw3_ex3",
+                    instruction = "Construct a Nominal Descriptive Sentence (جملة اسمية) about academic writing:",
+                    sentenceTypeTag = "Nominal Sentence (جملة اسمية)",
+                    scrambledWords = listOf("essential", "Clear", "is", "organization", "paragraph"),
+                    targetSentence = "Clear paragraph organization is essential",
+                    grammarHint = "Noun Phrase Subject ('Clear paragraph organization') + Linking Verb ('is') + Adjective ('essential')."
+                ),
+                SentenceBuildExercise(
+                    id = "rw3_ex4",
+                    instruction = "Construct the matching Verbal Action Sentence (جملة فعلية):",
+                    sentenceTypeTag = "Verbal Sentence (جملة فعلية)",
+                    scrambledWords = listOf("their", "organize", "Skilled", "paragraphs", "writers", "clearly"),
+                    targetSentence = "Skilled writers organize their paragraphs clearly",
+                    grammarHint = "Subject ('Skilled writers') + Action Verb ('organize') + Object ('their paragraphs') + Adverb ('clearly')."
+                )
             )
         ),
+
+        // === BOX 11: Intermediate A (General - 4 Rooms) ===
         LevelSeed(
-            id = "lvl_11_intermediate_a",
+            id = "lvl_11_inter_a",
             order = 11,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 2 • Intermediate Core",
+            stageGroup = "Stage 4 • Intermediate Block (Boxes 11–13)",
             title = "Intermediate A",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "INTA-111",
-            sizeMb = 17.2f,
-            badgeName = "Second Conditional Dreamer",
-            emoji = "🌈",
-            badgeDesc = "Completed Intermediate A (45 Hrs): Second Conditional hypotheticals, Passive Voice across tenses, and relative clauses.",
-            skills = listOf("Second Conditional", "Passive Voice", "Relative Clauses", "Reading"),
-            topicFocus = "Imaginary situations (If I were...), defining relative clauses (who, which, where), and how things are made (Passive Voice).",
+            sizeMb = 16.8f,
+            badgeName = "Passive Voice & Process Master",
+            emoji = "⚙️",
+            badgeDesc = "Completed Box 11 (Intermediate A): Passive Voice across tenses and Second Conditional.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Passive Voice (Present & Past) and Second Conditional ('If + Past Simple, would + Verb').",
             vocab = listOf(
-                "Hypothetical" to "Imagined or suggested, but not necessarily real.",
-                "Manufactured" to "Made on a large scale using machinery.",
-                "Bilingual" to "Able to speak two languages fluently.",
-                "Obstacle" to "Something that blocks your way or makes progress hard."
+                VocabWordItem("v11_1", "Manufactured in", "Produced on a large scale in a specific place.", "صُنع في", "These smartphones are manufactured in East Asia.", "Passive"),
+                VocabWordItem("v11_2", "Hypothetical situation", "An imagined scenario rather than a current fact.", "موقف افتراضي", "We use the Second Conditional to describe a hypothetical situation.", "Academic"),
+                VocabWordItem("v11_3", "Renewable energy", "Energy from sources that are naturally replenished like solar or wind.", "الطاقة المتجددة", "Solar power is a clean form of renewable energy.", "Science"),
+                VocabWordItem("v11_4", "Implemented", "Put a decision, plan, or system into effect.", "تم تطبيقه / تنفيذه", "The new curriculum was implemented this year.", "Verb")
             ),
-            grammarRule = "Second Conditional for unreal present/future: 'If + Past Simple, would + base verb'. Example: 'If I had wings, I would fly to school.'",
-            assignmentTask = "Present a 5-slide or 5-card pitch: 'If I Were Principal for a Week' using Second Conditional and relative clauses.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "If I ___ you, I would practice speaking every day.", listOf("am", "were", "will be", "been"), 1, "In Second Conditional, 'If I were you' is the standard subjunctive form."),
-                SkillQuizQuestion("q2", "The telephone ___ invented by Alexander Graham Bell in 1876.", listOf("is", "was", "has", "were"), 1, "Past Simple Passive uses 'was/were + past participle'."),
-                SkillQuizQuestion("q3", "A chef is a person ___ prepares delicious meals.", listOf("which", "who", "where", "whose"), 1, "Use 'who' for people in defining relative clauses.")
+            grammarRule = "1) Passive Voice (be + Past Participle) focuses on the receiver of the action rather than the doer. 2) Second Conditional ('If + Past Simple, would + Base Verb') describes unreal or hypothetical present/future situations.",
+            grammarFormula = "Passive: Object + am/is/are/was/were + V3 | 2nd Cond: If + Past, would + Verb",
+            affirmativeExamples = listOf("English is spoken all over the world.", "The telephone was invented in 1876.", "If I had more free time, I would read two books a week."),
+            negativeExamples = listOf("The results were not announced yesterday.", "If I were you, I would not skip the practice room."),
+            questionExamples = listOf("When was the institute founded?", "What would you do if you won a scholarship abroad?"),
+            assignmentTask = "Write 3 Passive Voice sentences about inventions and 3 Second Conditional sentences.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp11_1", "What does 'Manufactured in' mean?", listOf("Destroyed in", "Produced or made in a factory", "Forgotten in", "Hidden in"), 1, "Manufactured means produced or made."),
+                SkillQuizQuestion("vp11_2", "Which phrase refers to solar and wind power?", listOf("Renewable energy", "Fossil fuel", "Heavy luggage", "Ancient history"), 0, "Solar and wind are renewable energy sources."),
+                SkillQuizQuestion("vp11_3", "What is an imagined, non-factual scenario called?", listOf("A hypothetical situation", "A historical fact", "A daily routine", "A receipt"), 0, "Hypothetical means imagined or theoretical.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp11_1", "Choose the correct Passive form: 'The new bridge ___ built last year.'", listOf("is", "was", "were", "has"), 1, "Singular subject 'The new bridge' + 'last year' requires 'was built'."),
+                SkillQuizQuestion("gp11_2", "Complete the Second Conditional: 'If I ___ the answer, I would tell you.'", listOf("know", "knew", "known", "will know"), 1, "Second Conditional uses Past Simple ('knew') in the 'if' clause."),
+                SkillQuizQuestion("gp11_3", "Complete the advice phrase: 'If I ___ you, I would practice every day.'", listOf("am", "was", "were", "be"), 2, "In formal Second Conditional, we use 'If I were you'.")
             )
         ),
+
+        // === BOX 12: Intermediate B (General - 4 Rooms) ===
         LevelSeed(
-            id = "lvl_12_intermediate_b",
+            id = "lvl_12_inter_b",
             order = 12,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 2 • Intermediate Core",
+            stageGroup = "Stage 4 • Intermediate Block (Boxes 11–13)",
             title = "Intermediate B",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "INTB-112",
-            sizeMb = 17.6f,
-            badgeName = "Reported Speech Reporter",
-            emoji = "📰",
-            badgeDesc = "Conquered Intermediate B (45 Hrs): Past Perfect, Reported Speech, and phrasal verbs in action.",
-            skills = listOf("Reported Speech", "Past Perfect", "Phrasal Verbs", "Journalism"),
-            topicFocus = "Reporting what others said, sequencing past events with Past Perfect (had done), and everyday phrasal verbs.",
+            sizeMb = 17.2f,
+            badgeName = "Reported Speech & Perfect Continuous",
+            emoji = "🗣️",
+            badgeDesc = "Completed Box 12 (Intermediate B): Reported Speech, Past Perfect, and Present Perfect Continuous.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Reported Speech (Indirect Speech), Past Perfect ('had + V3'), and Present Perfect Continuous.",
             vocab = listOf(
-                "Look forward to" to "Feel excited about something that is going to happen.",
-                "Figure out" to "Solve a problem or understand something.",
-                "Give up" to "Stop trying to do something.",
-                "Eyewitness" to "A person who saw an event happen with their own eyes."
+                VocabWordItem("v12_1", "Confirmed that", "Stated officially that something is true.", "أكّد أن", "The coordinator confirmed that the exam starts at 10 AM.", "Reporting"),
+                VocabWordItem("v12_2", "Prior to", "Before a particular time or event.", "قبل / سابق لـ", "She had studied basic vocabulary prior to joining the course.", "Preposition"),
+                VocabWordItem("v12_3", "Consistently", "In every case or on every occasion; steadily.", "بانتظام / باستمرار", "He has been practicing consistently for three months.", "Adverb"),
+                VocabWordItem("v12_4", "Clarify", "Make a statement or situation less confused and more understandable.", "يوضّح", "Could you clarify the difference between these two tenses?", "Verb")
             ),
-            grammarRule = "Reported Speech shifts tense one step back: Direct: 'I am ready.' -> Reported: 'She said that she was ready.'",
-            assignmentTask = "Act as a school news reporter: interview two students and write a news report using at least 5 Reported Speech sentences.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Direct: 'I love English.' -> Reported: He said that he ___ English.", listOf("loves", "loved", "will love", "loving"), 1, "Present Simple 'love' shifts back to Past Simple 'loved'."),
-                SkillQuizQuestion("q2", "When we arrived at the station, the train ___ already left.", listOf("has", "had", "was", "did"), 1, "Past Perfect ('had left') shows an action that happened before another past action."),
-                SkillQuizQuestion("q3", "What does the phrasal verb 'figure out' mean?", listOf("Solve or understand", "Throw away", "Wake up late", "Walk outside"), 0, "'Figure out' means to find the answer or understand.")
+            grammarRule = "1) Past Perfect ('had + V3') shows which of two past actions happened first. 2) Reported Speech shifts present tenses back one step into the past ('am/is' -> 'was', 'will' -> 'would').",
+            grammarFormula = "Past Perfect: Subject + had + V3 | Reported: He said (that) + backshifted verb",
+            affirmativeExamples = listOf("When we arrived, the class had already started.", "She said that she was preparing for Box 13.", "I have been studying English since morning."),
+            negativeExamples = listOf("He told me that he had not received the file yet."),
+            questionExamples = listOf("Had you studied Past Perfect before today?", "What did the teacher say about the homework?"),
+            assignmentTask = "Convert 4 direct quotes from your teacher into Reported Speech and write 2 Past Perfect sentences.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp12_1", "What does 'Prior to' mean?", listOf("After", "Before", "During", "Because of"), 1, "'Prior to' is a formal phrase meaning 'before'."),
+                SkillQuizQuestion("vp12_2", "Which word means 'make something clearer and easier to understand'?", listOf("Clarify", "Complicate", "Cancel", "Ignore"), 0, "To clarify is to make clear."),
+                SkillQuizQuestion("vp12_3", "If someone studies steadily every single day, they study ___.", listOf("consistently", "rarely", "accidentally", "never"), 0, "'Consistently' means steadily and regularly.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp12_1", "Complete with Past Perfect: 'By the time I got to the station, the train ___ left.'", listOf("has", "had", "was", "did"), 1, "'Had left' shows the train departed before I arrived."),
+                SkillQuizQuestion("gp12_2", "Report this statement: Sara said, 'I will unlock the next level.'", listOf("Sara said that she will unlock the next level.", "Sara said that she would unlock the next level.", "Sara said that I would unlock it.", "Sara says she unlocked it."), 1, "In Reported Speech, 'will' shifts back to 'would'."),
+                SkillQuizQuestion("gp12_3", "Complete with Present Perfect Continuous: 'We ___ waiting for twenty minutes.'", listOf("have been", "has been", "had", "are"), 0, "'We' takes 'have been + V-ing'.")
             )
         ),
+
+        // === BOX 13: Skills 4 (Listening & Speaking Skills - 2 Specialized Rooms) ===
         LevelSeed(
-            id = "lvl_13_skills_ls_2",
+            id = "lvl_13_skills_ls_4",
             order = 13,
             track = DiplomaTrack.INTERMEDIATE_DIPLOMA,
-            stageGroup = "Stage 2 • Intermediate Core",
-            title = "Skills (L&S) II",
+            stageGroup = "Stage 4 • Intermediate Block (Boxes 11–13)",
+            title = "Skills 4",
+            boxType = BoxArchitectureType.SKILLS_LS_2_ROOMS,
             hours = 45,
-            code = "SLS2-113",
+            code = "SLS4-113",
             sizeMb = 19.4f,
-            badgeName = "Debate & Presentation Star",
-            emoji = "🎤",
-            badgeDesc = "Graduated Intermediate Diploma with Skills (L&S) II (45 Hrs): structured debates, note-taking, and public speaking!",
-            skills = listOf("Public Speaking", "Debating", "Note-Taking", "Fluency"),
-            topicFocus = "Delivering 3-minute presentations, polite agreement & disagreement, and taking structured notes from lectures.",
+            badgeName = "Active Listener & Speaker II",
+            emoji = "🎧",
+            badgeDesc = "Mastered Box 13 (Skills 4): intermediate audio dictation, vocabulary capture, and fluent spoken discussions.",
+            skills = listOf("Listening & Vocabulary Dictation Room", "Speaking & Voice Interaction Room"),
+            topicFocus = "Intermediate listening dictation, workplace & academic dialogues, and structured voice responses.",
             vocab = listOf(
-                "I see your point, however..." to "Polite way to disagree in a class discussion.",
-                "To sum up" to "Phrase used to summarize main points at the end of a talk.",
-                "Eye contact" to "Looking directly at your audience while speaking.",
-                "Signposting language" to "Phrases that guide listeners through a presentation."
+                VocabWordItem("v13_1", "From my perspective", "Used to express a thoughtful point of view in discussion.", "من وجهة نظري", "From my perspective, technology makes language learning much faster.", "Speaking"),
+                VocabWordItem("v13_2", "Collaborate", "Work jointly with others on an activity or project.", "يتعاون", "Students collaborate in pairs during speaking workshops.", "Verb"),
+                VocabWordItem("v13_3", "Significant improvement", "A noticeable and important positive change.", "تحسّن ملحوظ", "Your pronunciation showed significant improvement this month.", "Collocation"),
+                VocabWordItem("v13_4", "Could you elaborate on that?", "Polite way to ask a speaker for more detail.", "هل يمكنك توضيح ذلك بالتفصيل؟", "That is an interesting idea; could you elaborate on that?", "Discussion")
             ),
-            grammarRule = "Polite Hedging in Discussions: Use 'It seems to me that...', 'Could it be that...?', and 'While I agree up to a point...'",
-            assignmentTask = "Deliver a 3-minute mini-talk on a topic of your choice using visual cues and answer 2 audience questions.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Which phrase is the most polite way to disagree in a classroom debate?", listOf("You are totally wrong!", "I see your point, but have we considered...?", "That makes zero sense.", "Stop speaking."), 1, "Acknowledging the other person's point before sharing a counterpoint is respectful and persuasive."),
-                SkillQuizQuestion("q2", "What is 'signposting' in a presentation?", listOf("Using phrases like 'First, let's look at...' to guide the audience", "Holding a traffic sign", "Whispering quietly", "Reading without looking up"), 0, "Signposting helps listeners follow the structure of your talk."),
-                SkillQuizQuestion("q3", "When taking notes during a listening task, you should write:", listOf("Key words, symbols, and main ideas", "Every single word slowly", "Nothing at all", "Only punctuation marks"), 0, "Effective note-taking uses keywords and abbreviations.")
+            grammarRule = "Structured Spoken Opinions: State your main point clearly, support it with a reason ('because / since'), and give a brief example.",
+            grammarFormula = "Point of View + Reason ('because') + Personal Example",
+            affirmativeExamples = listOf("I believe group study is effective because students can correct each other.", "We have been collaborating on this presentation all week."),
+            negativeExamples = listOf("I don't completely agree with that statement because the circumstances have changed."),
+            questionExamples = listOf("How has technology changed the way you learn English?", "What would you do if you could study anywhere in the world?"),
+            assignmentTask = "Complete the 3 intermediate dictation passages and record accurate spoken answers to all 3 discussion questions.",
+            vocabPractice = emptyList(),
+            grammarPractice = emptyList(),
+            listeningExercises = listOf(
+                ListeningDictationExercise(
+                    id = "ls4_dict_1",
+                    title = "Passage 1 • Academic Progress Feedback",
+                    audioTranscript = "Your speaking fluency has shown significant improvement this semester",
+                    hintText = "Listen for the two-word phrase meaning 'noticeable positive change'.",
+                    keyWordsToExtract = listOf(
+                        "fluency" to "الطلاقة اللغوية",
+                        "significant improvement" to "تحسّن ملحوظ"
+                    )
+                ),
+                ListeningDictationExercise(
+                    id = "ls4_dict_2",
+                    title = "Passage 2 • Team Project Meeting",
+                    audioTranscript = "We need to collaborate closely to finish before the deadline",
+                    hintText = "Listen for the verb meaning 'work together' and the final due date noun.",
+                    keyWordsToExtract = listOf(
+                        "collaborate" to "يتعاون",
+                        "deadline" to "الموعد النهائي"
+                    )
+                ),
+                ListeningDictationExercise(
+                    id = "ls4_dict_3",
+                    title = "Passage 3 • Problem Solving",
+                    audioTranscript = "If we practice every day our confidence will grow rapidly",
+                    hintText = "A First Conditional sentence about daily practice and confidence.",
+                    keyWordsToExtract = listOf(
+                        "confidence" to "الثقة بالنفس",
+                        "rapidly" to "بسرعة"
+                    )
+                )
+            ),
+            speakingPrompts = listOf(
+                SpeakingVoicePrompt(
+                    id = "ls4_spk_1",
+                    questionAudioText = "How has practicing listening and speaking helped your confidence in English?",
+                    arabicPromptHint = "أجب بصوتك: كيف ساعدك تدريب الاستماع والتحدث على زيادة ثقتك في الإنجليزية؟",
+                    sampleTargetAnswer = "Practicing listening and speaking every day has improved my confidence and pronunciation",
+                    requiredKeywords = listOf("practicing", "confidence"),
+                    grammarFocusLabel = "Present Perfect Impact"
+                ),
+                SpeakingVoicePrompt(
+                    id = "ls4_spk_2",
+                    questionAudioText = "If you could visit any country to practice English, where would you go and why?",
+                    arabicPromptHint = "أجب بصوتك: لو أتيحت لك زيارة أي دولة لممارسة الإنجليزية، أين ستذهب ولماذا؟",
+                    sampleTargetAnswer = "If I could visit any country I would go to Britain to practice English with native speakers",
+                    requiredKeywords = listOf("would", "practice", "English"),
+                    grammarFocusLabel = "Second Conditional Speaking"
+                ),
+                SpeakingVoicePrompt(
+                    id = "ls4_spk_3",
+                    questionAudioText = "Do you prefer studying alone or collaborating with classmates, and why?",
+                    arabicPromptHint = "أجب بصوتك: هل تفضل الدراسة بمفردك أم التعاون مع زملائك، ولماذا؟",
+                    sampleTargetAnswer = "I prefer collaborating with classmates because we can share ideas and practice speaking together",
+                    requiredKeywords = listOf("prefer", "because"),
+                    grammarFocusLabel = "Opinion & Justification"
+                )
             )
         ),
 
-        // === ADVANCED DIPLOMA: STAGE 1 (Levels 14-17) ===
+        // === BOX 14: Upper intermediate A (General - 4 Rooms) ===
         LevelSeed(
-            id = "lvl_14_upper_int_a",
+            id = "lvl_14_upper_inter_a",
             order = 14,
             track = DiplomaTrack.ADVANCED_DIPLOMA,
-            stageGroup = "Upper-Intermediate Block",
-            title = "Upper-Intermediate A",
+            stageGroup = "Stage 5 • Upper-Intermediate Block (Boxes 14–17)",
+            title = "Upper intermediate A",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "UPIA-201",
-            sizeMb = 18.2f,
-            badgeName = "Narrative Tense Virtuoso",
-            emoji = "🏛️",
-            badgeDesc = "Completed Upper-Intermediate A (45 Hrs): narrative tenses, Present Perfect Continuous, and nuanced collocations.",
-            skills = listOf("Present Perfect Continuous", "Narrative Tenses", "Collocations", "Reading"),
-            topicFocus = "Combining Past Simple, Continuous, and Perfect Continuous in rich storytelling; strong collocations.",
+            sizeMb = 17.8f,
+            badgeName = "Third Conditional & Past Deduction",
+            emoji = "🔬",
+            badgeDesc = "Completed Box 14 (Upper intermediate A): Third Conditional and Past Modals ('must have / should have').",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Third Conditional ('If + had + V3, would have + V3') and Modals of Past Deduction & Regret.",
             vocab = listOf(
-                "Make a breakthrough" to "Achieve an important discovery or success.",
-                "Heavy traffic / Heavy rain" to "Natural English collocation using 'heavy'.",
-                "Exhausted" to "Extreme adjective meaning 'very tired'.",
-                "Furious" to "Extreme adjective meaning 'very angry'."
+                VocabWordItem("v14_1", "In hindsight", "Understanding of a situation only after it has happened.", "بالنظر إلى الماضي / بعد فوات الأوان", "In hindsight, I should have started preparing a week earlier.", "Idiom"),
+                VocabWordItem("v14_2", "Inevitable", "Certain to happen; unavoidable.", "حتمي / لا مفر منه", "With daily dedication, academic progress is inevitable.", "Adjective"),
+                VocabWordItem("v14_3", "Crucial factor", "A decisive or critically important element.", "عامل حاسم", "Consistent vocabulary review is a crucial factor in fluency.", "Collocation"),
+                VocabWordItem("v14_4", "Overcome obstacles", "Successfully deal with and defeat difficulties.", "يتغلب على العقبات", "She worked hard to overcome obstacles in pronunciation.", "Verb Phrase")
             ),
-            grammarRule = "Present Perfect Continuous ('have/has been + -ing') emphasizes the ongoing duration of an activity: 'She has been practicing piano all morning.'",
-            assignmentTask = "Write a dramatic 200-word mystery or adventure story incorporating all four narrative tenses and 5 extreme adjectives.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Which modifier is used with extreme adjectives like 'exhausted' or 'freezing'?", listOf("very", "absolutely", "a bit", "fairly"), 1, "Extreme adjectives pair with 'absolutely' or 'completely', not 'very'."),
-                SkillQuizQuestion("q2", "We ___ waiting for the bus for twenty minutes, and it just arrived!", listOf("have been", "are", "did", "had"), 0, "'Have been waiting' highlights the duration up to the present moment."),
-                SkillQuizQuestion("q3", "Which word naturally collocates with 'a mistake'?", listOf("do a mistake", "make a mistake", "take a mistake", "have a mistake"), 1, "In English, we say 'make a mistake'.")
+            grammarRule = "1) Third Conditional ('If + had + V3, would have + V3') talks about hypothetical past situations and their imagined past results. 2) Past Modals: 'should have + V3' (past regret/criticism), 'must have + V3' (logical past certainty).",
+            grammarFormula = "If + Subject + had + V3, Subject + would have + V3",
+            affirmativeExamples = listOf("If I had known about the workshop, I would have attended.", "He must have studied hard because he earned three stars."),
+            negativeExamples = listOf("If she hadn't set an alarm, she wouldn't have arrived on time."),
+            questionExamples = listOf("What would you have done if you had missed the train?", "Should we have reviewed Room 2 before taking the quiz?"),
+            assignmentTask = "Write 3 Third Conditional sentences reflecting on past decisions and 2 sentences using 'should have + V3'.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp14_1", "What does 'In hindsight' mean?", listOf("Looking into the future", "Understanding a situation after it has already happened", "Closing your eyes", "Forgetting the past"), 1, "Hindsight is understanding after an event has occurred."),
+                SkillQuizQuestion("vp14_2", "If something is certain to happen and cannot be avoided, it is ___.", listOf("inevitable", "optional", "unlikely", "accidental"), 0, "'Inevitable' means unavoidable."),
+                SkillQuizQuestion("vp14_3", "What does 'Overcome obstacles' mean?", listOf("Create new problems", "Successfully deal with difficulties", "Give up quickly", "Avoid studying"), 1, "Overcoming obstacles means succeeding despite difficulties.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp14_1", "Complete the Third Conditional: 'If they had left earlier, they ___ caught the flight.'", listOf("will have", "would have", "would", "had"), 1, "The main clause of the Third Conditional uses 'would have + V3'."),
+                SkillQuizQuestion("gp14_2", "Which phrase expresses regret about a past action?", listOf("I should have studied more.", "I must study tomorrow.", "I can study now.", "I will study."), 0, "'Should have + V3' expresses past regret or advice in hindsight."),
+                SkillQuizQuestion("gp14_3", "The ground is completely wet. It ___ rained heavily last night.", listOf("must have", "should", "can't", "would"), 0, "'Must have + V3' expresses a strong logical deduction about the past.")
             )
         ),
+
+        // === BOX 15: Upper intermediate B (General - 4 Rooms) ===
         LevelSeed(
-            id = "lvl_15_upper_int_b",
+            id = "lvl_15_upper_inter_b",
             order = 15,
             track = DiplomaTrack.ADVANCED_DIPLOMA,
-            stageGroup = "Upper-Intermediate Block",
-            title = "Upper-Intermediate B",
+            stageGroup = "Stage 5 • Upper-Intermediate Block (Boxes 14–17)",
+            title = "Upper intermediate B",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "UPIB-202",
-            sizeMb = 18.8f,
-            badgeName = "Third Conditional Strategist",
-            emoji = "🔮",
-            badgeDesc = "Mastered Upper-Intermediate B (45 Hrs): Third Conditional, modals of deduction (must have / might have), and Future Continuous.",
-            skills = listOf("Third Conditional", "Past Modals", "Future Continuous", "Critical Thinking"),
-            topicFocus = "Reflecting on past outcomes (Third Conditional), detective deductions (must have / can't have), and Future Continuous/Perfect.",
+            sizeMb = 18.1f,
+            badgeName = "Future Perfect & Causative Master",
+            emoji = "🏛️",
+            badgeDesc = "Completed Box 15 (Upper intermediate B): Future Perfect, Future Continuous, and Causative 'have/get something done'.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Future Continuous ('will be + V-ing'), Future Perfect ('will have + V3'), and Causative structures.",
             vocab = listOf(
-                "In hindsight" to "Understanding a situation only after it has happened.",
-                "Jump to conclusions" to "Make a hasty judgment before having all the facts.",
-                "By this time next year" to "Time marker for Future Continuous / Future Perfect.",
-                "Inevitable" to "Certain to happen; unavoidable."
+                VocabWordItem("v15_1", "By the end of this year", "Time marker used with Future Perfect for completion before a deadline.", "بحلول نهاية هذا العام", "By the end of this year, I will have completed all 21 boxes.", "Time Marker"),
+                VocabWordItem("v15_2", "Delegate tasks", "Assign responsibility for specific tasks to others.", "يفوّض المهام", "Effective managers know how to delegate tasks clearly.", "Business"),
+                VocabWordItem("v15_3", "Comprehensive", "Complete and including all or nearly all elements.", "شامل / وافٍ", "Room 2 provides a comprehensive explanation of the grammar rule.", "Adjective"),
+                VocabWordItem("v15_4", "Milestone", "A significant stage or event in the development of something.", "محطة هامة / إنجاز مرحلي", "Completing Box 15 is a major milestone in your English journey.", "Noun")
             ),
-            grammarRule = "Third Conditional (unreal past): 'If + Past Perfect, would have + past participle'. Example: 'If we had left earlier, we would have caught the flight.'",
-            assignmentTask = "Solve the 'Classroom Mystery Case' worksheet by writing 6 deductions using 'must have', 'might have', and 'can't have'.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "If she had set her alarm, she ___ woken up on time.", listOf("will have", "would have", "had", "would"), 1, "Third Conditional uses 'would have + past participle' in the result clause."),
-                SkillQuizQuestion("q2", "The streets are completely wet. It ___ rained while we were inside.", listOf("must have", "can't have", "should", "will"), 0, "'Must have + past participle' expresses a strong logical deduction about the past."),
-                SkillQuizQuestion("q3", "By 2030, our institute ___ graduated thousands of bilingual students.", listOf("will have", "is", "was", "had"), 0, "'By + future year' pairs with Future Perfect ('will have + past participle').")
+            grammarRule = "1) Future Perfect ('will have + V3') describes an action that will be completed before a specific future time. 2) Causative ('have/get + Object + Past Participle') describes arranging for someone else to do a service for you.",
+            grammarFormula = "Future Perfect: will have + V3 | Causative: have/get + Object + V3",
+            affirmativeExamples = listOf("By next month, she will have mastered 500 new words.", "I had my essay proofread by the instructor."),
+            negativeExamples = listOf("They won't have finished the renovation by Monday."),
+            questionExamples = listOf("How many boxes will you have unlocked by June?", "Where did you get your laptop repaired?"),
+            assignmentTask = "Write 3 Future Perfect sentences starting with 'By next year...' and 2 Causative sentences.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp15_1", "What is a 'Milestone'?", listOf("A small mistake", "An important stage or achievement in a journey", "A broken road", "A short break"), 1, "A milestone is a significant stage of progress."),
+                SkillQuizQuestion("vp15_2", "Which word means 'complete and covering all necessary details'?", listOf("Comprehensive", "Partial", "Brief", "Careless"), 0, "'Comprehensive' means thorough and complete."),
+                SkillQuizQuestion("vp15_3", "Which time phrase typically triggers the Future Perfect tense?", listOf("Yesterday morning", "By the end of this year", "Two days ago", "Every Sunday"), 1, "'By + future time' signals Future Perfect.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp15_1", "Complete with Future Perfect: 'By 6:00 PM, we ___ completed the exam.'", listOf("will be", "will have", "would have", "have"), 1, "'By 6:00 PM' takes 'will have + V3'."),
+                SkillQuizQuestion("gp15_2", "Choose the correct Causative form: 'I need to get my car ___ before the trip.'", listOf("service", "servicing", "serviced", "to service"), 2, "Causative structure is 'get + object + Past Participle (serviced)'."),
+                SkillQuizQuestion("gp15_3", "At 10 AM tomorrow, I ___ taking my speaking assessment.", listOf("will be", "will have", "had been", "am"), 0, "An action in progress at a specific future time uses Future Continuous ('will be + V-ing').")
             )
         ),
+
+        // === BOX 16: Upper intermediate C (General - 4 Rooms) ===
         LevelSeed(
-            id = "lvl_16_upper_int_c",
+            id = "lvl_16_upper_inter_c",
             order = 16,
             track = DiplomaTrack.ADVANCED_DIPLOMA,
-            stageGroup = "Upper-Intermediate Block",
-            title = "Upper-Intermediate C",
+            stageGroup = "Stage 5 • Upper-Intermediate Block (Boxes 14–17)",
+            title = "Upper intermediate C",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "UPIC-203",
-            sizeMb = 19.5f,
-            badgeName = "Rhetoric & Inversion Knight",
-            emoji = "🛡️",
-            badgeDesc = "Conquered Upper-Intermediate C (45 Hrs): causative verbs, cleft sentences for emphasis, and advanced idioms.",
-            skills = listOf("Causative Verbs", "Cleft Sentences", "Idioms", "Synthesizing"),
-            topicFocus = "Causative structures (have/get something done), adding emphasis (What I love most is...), and idiomatic fluency.",
+            sizeMb = 18.5f,
+            badgeName = "Participle Clauses & Emphasis",
+            emoji = "🌟",
+            badgeDesc = "Completed Box 16 (Upper intermediate C): Participle clauses, Cleft sentences, and mixed conditionals.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Cleft Sentences for emphasis ('What I need is... / It was... that...'), Participle Clauses, and Mixed Conditionals.",
             vocab = listOf(
-                "Hit the nail on the head" to "Describe exactly what is causing a situation or problem.",
-                "A blessing in disguise" to "Something that seems bad at first, but results in something good.",
-                "Once in a blue moon" to "Happening very rarely.",
-                "State-of-the-art" to "Using the newest and most advanced ideas and features."
+                VocabWordItem("v16_1", "Compelling argument", "A convincing and powerful reason that persuades others.", "حجة مقنعة وقوية", "The speaker presented a compelling argument supported by data.", "Academic"),
+                VocabWordItem("v16_2", "Acknowledge", "Accept or admit the existence or truth of something.", "يقرّ بـ / يعترف بـ", "Good writers acknowledge different viewpoints in an essay.", "Verb"),
+                VocabWordItem("v16_3", "Furthermore / Moreover", "Formal transitions used to add weight to an argument.", "علاوة على ذلك / فضلاً عن ذلك", "The method is fast; moreover, it is highly accurate.", "Transition"),
+                VocabWordItem("v16_4", "Substantial", "Of considerable importance, size, or worth.", "جوهري / كبير", "She made substantial progress in her academic writing.", "Adjective")
             ),
-            grammarRule = "Causative 'Have/Get + Object + Past Participle': Used when someone else performs a service for you: 'I had my laptop repaired yesterday.'",
-            assignmentTask = "Rewrite 8 standard sentences into emphatic Cleft Sentences ('What really inspires me is...', 'It was in 2024 that...') and use 4 idioms in a dialogue.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Choose the correct causative form: 'We ___ our classroom painted last week.'", listOf("had", "made", "did", "were"), 0, "'Had + object + past participle' ('had our classroom painted') is the causative structure."),
-                SkillQuizQuestion("q2", "What does the idiom 'hit the nail on the head' mean?", listOf("Break a tool", "Be exactly right about something", "Build a house", "Make a loud noise"), 1, "It means to state the exact truth or point."),
-                SkillQuizQuestion("q3", "'___ I enjoy most about English class is the group debates.'", listOf("Which", "What", "Who", "Where"), 1, "Wh-cleft sentences begin with 'What...' to create emphasis.")
+            grammarRule = "1) Cleft Sentences ('What + clause + is/was...' or 'It is/was + X + that...') add strong focus and emphasis. 2) Participle Clauses ('Having finished the work, he...') express cause or sequence concisely.",
+            grammarFormula = "What + Subject + Verb + is/was + Focus | Having + V3, Main Clause",
+            affirmativeExamples = listOf("What helped me most was the daily flashcard review.", "Having completed Room 3, she moved directly to Room 4."),
+            negativeExamples = listOf("It wasn't the vocabulary that confused him, but the complex tense."),
+            questionExamples = listOf("What is it that motivates you to master English?"),
+            assignmentTask = "Rewrite 4 standard sentences as Cleft Sentences ('What...' and 'It was...') for emphasis.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp16_1", "What is a 'Compelling argument'?", listOf("A weak excuse", "A convincing and persuasive reason", "A loud shouting match", "An unrelated question"), 1, "Compelling means powerful and convincing."),
+                SkillQuizQuestion("vp16_2", "Which word means 'of considerable size, worth, or importance'?", listOf("Substantial", "Tiny", "Rare", "Accidental"), 0, "'Substantial' means large and important."),
+                SkillQuizQuestion("vp16_3", "What does 'Acknowledge' mean?", listOf("Recognize or admit the truth of something", "Deny completely", "Forget quickly", "Hide"), 0, "To acknowledge is to recognize or accept as true.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp16_1", "Choose the Cleft Sentence that emphasizes 'daily practice':", listOf("Daily practice is good.", "What improves fluency most is daily practice.", "Practice daily.", "Fluency is good."), 1, "'What improves fluency most is...' is a Wh-cleft structure for emphasis."),
+                SkillQuizQuestion("gp16_2", "Complete the participle clause: '___ finished the assignment, Sara submitted her notebook.'", listOf("Have", "Having", "Had", "Has"), 1, "'Having + Past Participle' shows the first action was completed before the second."),
+                SkillQuizQuestion("gp16_3", "Complete the mixed conditional: 'If I had taken that course last year, I ___ fluent now.'", listOf("would be", "would have been", "will be", "am"), 0, "Past condition ('If I had taken') with a present result ('now') uses 'would be'.")
             )
         ),
+
+        // === BOX 17: Skills 5 RW (Reading & Writing Skills - 2 Specialized Rooms) ===
         LevelSeed(
-            id = "lvl_17_skills_wr",
+            id = "lvl_17_skills_rw_5",
             order = 17,
             track = DiplomaTrack.ADVANCED_DIPLOMA,
-            stageGroup = "Upper-Intermediate Block",
-            title = "Skills (Wr)",
+            stageGroup = "Stage 5 • Upper-Intermediate Block (Boxes 14–17)",
+            title = "Skills 5 RW",
+            boxType = BoxArchitectureType.SKILLS_RW_2_ROOMS,
             hours = 45,
-            code = "SKWR-204",
-            sizeMb = 17.9f,
-            badgeName = "Master Quill Author",
-            emoji = "🪶",
-            badgeDesc = "Completed Upper-Intermediate Skills (Wr) 45 Hrs: persuasive essays, formal reports, and academic paraphrasing.",
-            skills = listOf("Academic Writing", "Paraphrasing", "Formal Reports", "Cohesion"),
-            topicFocus = "Writing formal reports, persuasive argument essays, counter-arguments, and paraphrasing without plagiarism.",
+            code = "SRW5-204",
+            sizeMb = 18.9f,
+            badgeName = "Academic Sentence Architect III",
+            emoji = "🖋️",
+            badgeDesc = "Mastered Box 17 (Skills 5 RW): academic nominalization, complex verbal/nominal synthesis, and advanced reordering.",
+            skills = listOf("Grammar Explanation Room", "Writing & Sentence Construction Room"),
+            topicFocus = "Academic Nominalization (turning verbal clauses into sophisticated nominal structures), Inversion, and Essay Synthesis.",
             vocab = listOf(
-                "Counter-argument" to "An opposing viewpoint that you address and refute in an essay.",
-                "Cohesive devices" to "Linking words and pronouns that hold a text together smoothly.",
-                "Paraphrase" to "Express the meaning of a writer using different words and structures.",
-                "Objective tone" to "Writing based on facts rather than personal feelings."
+                VocabWordItem("v17_1", "Nominalization", "Converting verbs/adjectives into noun phrases for formal academic style.", "تحويل الجمل الفعلية إلى تراكيب اسمية أكاديمية", "Nominalization makes academic essays more concise and objective.", "Academic Writing"),
+                VocabWordItem("v17_2", "Not only ... but also", "Correlative conjunction for strong dual emphasis.", "ليس فقط ... بل أيضاً", "Not only did she master the vocabulary, but she also scored 100% in grammar.", "Structure"),
+                VocabWordItem("v17_3", "Consequently", "As a result; therefore.", "وبالتالي / نتيجة لذلك", "He practiced sentence construction daily; consequently, his writing score rose.", "Connector"),
+                VocabWordItem("v17_4", "Cohesion", "The grammatical and lexical linking within a text that holds it together.", "الترابط النصي والمنطقي", "Strong cohesion ensures every sentence flows naturally into the next.", "Writing")
             ),
-            grammarRule = "Concession Clauses: Use 'Although / Even though + clause' or 'Despite / In spite of + noun/-ing' to acknowledge opposing views gracefully.",
-            assignmentTask = "Submit a 250-word Formal Proposal Report recommending a new student club at the institute, complete with headings and recommendations.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "___ the heavy rain, all students arrived on time for the workshop.", listOf("Although", "Despite", "Even though", "Because"), 1, "'Despite' is followed by a noun phrase ('the heavy rain'), whereas 'Although' requires a subject and verb."),
-                SkillQuizQuestion("q2", "Which greeting is most appropriate for a formal report or letter to an unknown recipient?", listOf("Hey buddy,", "Dear Sir or Madam,", "Yo!", "What's up,"), 1, "'Dear Sir or Madam,' is the standard formal salutation."),
-                SkillQuizQuestion("q3", "Effective paraphrasing requires:", listOf("Changing both vocabulary and sentence structure while keeping the original meaning", "Copying every word without quotation marks", "Deleting half the meaning", "Changing only one comma"), 0, "Good paraphrasing rewords and restructures the sentence while preserving meaning.")
+            grammarRule = "1) Academic Nominalization vs. Verbal Clauses: Transform action-heavy clauses ('The institute analyzed the results carefully') into formal Nominal structures ('The careful analysis of the results was conducted by the institute'). 2) Negative Inversion ('Not only did + Subject + Base Verb...') for rhetorical power.",
+            grammarFormula = "Nominalization: Determiner + Adjective + Noun Phrase + Verb | Inversion: Not only + Auxiliary + Subject + Verb",
+            affirmativeExamples = listOf(
+                "Verbal Clause: Students participated actively, which improved their grades.",
+                "Nominalized Structure: Active student participation led to higher grades.",
+                "Inversion: Not only does reading build vocabulary, but it also refines grammar."
+            ),
+            negativeExamples = listOf(
+                "Avoid stringing together too many simple 'and / so' clauses in formal writing."
+            ),
+            questionExamples = listOf(
+                "How does nominalization elevate the tone of an academic paragraph?",
+                "Why do we invert the auxiliary and subject after 'Not only' at the start of a sentence?"
+            ),
+            nominalVsVerbalNotes = listOf(
+                "Academic Nominal Sentence (التركيب الاسمي الأكاديمي)" to "Centers on a rich Noun Phrase subject: 'The rapid expansion of digital education transformed classrooms.'",
+                "Dynamic Verbal Sentence (التركيب الفعلي الحركي)" to "Centers on an active verb: 'Digital education expanded rapidly and transformed classrooms.'",
+                "Emphatic Inversion (التقديم والتأخير البلاغي)" to "'Seldom have we seen such dedication' / 'Not only did he pass, but he also earned three stars.'"
+            ),
+            assignmentTask = "Complete all 4 advanced sentence construction exercises and transform 3 verbal sentences into formal nominal structures.",
+            vocabPractice = emptyList(),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp17_1", "Which sentence is the formal Nominalized version of 'The team investigated the issue thoroughly'?", listOf("The team did a thorough investigate.", "A thorough investigation of the issue was conducted by the team.", "Investigating thoroughly the team.", "The issue thoroughly investigated."), 1, "'A thorough investigation of the issue...' converts the verb 'investigated' and adverb 'thoroughly' into a formal noun phrase."),
+                SkillQuizQuestion("gp17_2", "Choose the correct inverted structure after 'Not only':", listOf("Not only she passed the test, but she also got 100%.", "Not only did she pass the test, but she also got 100%.", "Not only passed she the test.", "Not only she did pass."), 1, "When a sentence begins with 'Not only', invert the auxiliary verb: 'Not only did she pass...'."),
+                SkillQuizQuestion("gp17_3", "Which connector means 'as a result / therefore'?", listOf("Consequently", "Although", "Whereas", "Despite"), 0, "'Consequently' introduces a logical result.")
+            ),
+            rwExercises = listOf(
+                SentenceBuildExercise(
+                    id = "rw5_ex1",
+                    instruction = "Reorder the words to build an Academic Nominal Sentence (جملة اسمية أكاديمية):",
+                    sentenceTypeTag = "Academic Nominal Structure",
+                    scrambledWords = listOf("fluency", "Consistent", "accelerates", "practice", "language"),
+                    targetSentence = "Consistent practice accelerates language fluency",
+                    grammarHint = "Start with the Nominal Subject ('Consistent practice'), then the verb ('accelerates'), then the object ('language fluency')."
+                ),
+                SentenceBuildExercise(
+                    id = "rw5_ex2",
+                    instruction = "Reorder the words to build a formal inverted sentence starting with 'Not only':",
+                    sentenceTypeTag = "Emphatic Inversion",
+                    scrambledWords = listOf("Not", "only", "did", "study", "he", "passed", "also", "he"),
+                    targetSentence = "Not only did he study he also passed",
+                    grammarHint = "Use 'Not only + did + Subject + Base Verb', followed by the second clause."
+                ),
+                SentenceBuildExercise(
+                    id = "rw5_ex3",
+                    instruction = "Construct a Verbal Action Sentence (جملة فعلية) showing cause and effect:",
+                    sentenceTypeTag = "Verbal Action Clause",
+                    scrambledWords = listOf("carefully", "reviewed", "She", "her", "mistakes", "yesterday"),
+                    targetSentence = "She reviewed her mistakes carefully yesterday",
+                    grammarHint = "Subject ('She') + Verb ('reviewed') + Object ('her mistakes') + Manner ('carefully') + Time ('yesterday')."
+                ),
+                SentenceBuildExercise(
+                    id = "rw5_ex4",
+                    instruction = "Reorder to form a complex sentence with 'Despite':",
+                    sentenceTypeTag = "Complex Prepositional Phrase",
+                    scrambledWords = listOf("completed", "Despite", "the", "challenge", "they", "task", "the"),
+                    targetSentence = "Despite the challenge they completed the task",
+                    grammarHint = "'Despite + Noun Phrase ('the challenge')', followed by 'they completed the task'."
+                )
             )
         ),
 
-        // === ADVANCED DIPLOMA: STAGE 2 (Levels 18-21) ===
+        // === BOX 18: Advance A (General - 4 Rooms) ===
         LevelSeed(
-            id = "lvl_18_advanced_a",
+            id = "lvl_18_advance_a",
             order = 18,
             track = DiplomaTrack.ADVANCED_DIPLOMA,
-            stageGroup = "Advanced Mastery Block",
-            title = "Advanced A",
+            stageGroup = "Stage 6 • Advance Mastery Block (Boxes 18–21)",
+            title = "Advance A",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "ADVA-205",
-            sizeMb = 20.1f,
-            badgeName = "Inversion & Nuance Scholar",
+            sizeMb = 19.2f,
+            badgeName = "Inversion & Subjunctive Scholar",
             emoji = "🎓",
-            badgeDesc = "Mastered Advanced A (45 Hrs): negative inversion, mixed conditionals, and C1 academic reading.",
-            skills = listOf("Negative Inversion", "Mixed Conditionals", "C1 Vocabulary", "Critical Reading"),
-            topicFocus = "Stylistic negative inversion (Never have I seen..., Seldom does...), mixed conditionals, and analyzing complex articles.",
+            badgeDesc = "Completed Box 18 (Advance A): Negative Inversion ('Seldom / Never / Rarely') and the Formal Subjunctive.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Negative Inversion ('Rarely / Seldom / Little did...') and Formal Subjunctive ('essential that he be...').",
             vocab = listOf(
-                "Unprecedented" to "Never done or known before.",
-                "Ubiquitous" to "Present, appearing, or found everywhere.",
-                "Meticulous" to "Showing great attention to detail; very careful and precise.",
-                "Pragmatic" to "Dealing with things sensibly and realistically."
+                VocabWordItem("v18_1", "Unprecedented", "Never done or known before.", "غير مسبوق", "The digital library gives students unprecedented access to study materials.", "Adjective"),
+                VocabWordItem("v18_2", "Imperative", "Of vital importance; crucial.", "ضروري للغاية / حتمي", "It is imperative that every candidate arrive fifteen minutes early.", "Subjunctive Trigger"),
+                VocabWordItem("v18_3", "Articulate", "Able to express ideas clearly and effectively in speech or writing.", "فصيح / بليغ", "An articulate speaker organizes thoughts before answering.", "Adjective"),
+                VocabWordItem("v18_4", "Scrutinize", "Examine or inspect closely and thoroughly.", "يدقق / يفحص بعناية", "Always scrutinize your essay for grammar accuracy before submitting.", "Verb")
             ),
-            grammarRule = "Negative Inversion: When a sentence starts with a limiting adverb ('Never', 'Seldom', 'Not only'), invert the auxiliary and subject: 'Not only did she pass, but she also earned top marks.'",
-            assignmentTask = "Write an analytical book or documentary review using at least 3 Negative Inversions and 2 Mixed Conditional sentences.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Not only ___ the project early, but they also helped the other team.", listOf("they finished", "did they finish", "finished they", "they did finish"), 1, "After 'Not only' at the start of a sentence, invert the auxiliary verb and subject ('did they finish')."),
-                SkillQuizQuestion("q2", "What does 'ubiquitous' mean?", listOf("Extremely rare", "Found everywhere", "Very quiet", "Ancient"), 1, "'Ubiquitous' means appearing or found everywhere."),
-                SkillQuizQuestion("q3", "If I had learned Spanish as a child, I ___ fluent now.", listOf("would be", "would have been", "will be", "am"), 0, "Mixed conditional (past condition -> present result) uses 'If + Past Perfect, would + base verb' now.")
+            grammarRule = "1) Negative Adverbial Inversion: When a sentence begins with 'Seldom', 'Rarely', 'Never', or 'Little', invert the auxiliary and subject ('Rarely have I seen...'). 2) Formal Subjunctive: After 'essential / imperative / recommend that', use the bare infinitive ('that he study', 'that she be').",
+            grammarFormula = "Rarely/Seldom + Auxiliary + Subject + Verb | It is imperative that + Subject + Base Verb",
+            affirmativeExamples = listOf("Seldom have we witnessed such rapid progress.", "It is essential that every student complete the practice rooms."),
+            negativeExamples = listOf("The committee recommended that the policy not be delayed."),
+            questionExamples = listOf("When do we use the bare infinitive in the subjunctive mood?"),
+            assignmentTask = "Write 3 sentences using Negative Inversion ('Rarely', 'Never before', 'Little did') and 2 Subjunctive sentences.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp18_1", "What does 'Unprecedented' mean?", listOf("Happening every day", "Never done or known before", "Old-fashioned", "Predictable"), 1, "'Unprecedented' means never known or experienced before."),
+                SkillQuizQuestion("vp18_2", "If a speaker expresses complex ideas very clearly and fluently, they are ___.", listOf("articulate", "silent", "hesitant", "confused"), 0, "'Articulate' means able to speak clearly and effectively."),
+                SkillQuizQuestion("vp18_3", "What does 'Scrutinize' mean?", listOf("Glance quickly", "Examine closely and thoroughly", "Delete", "Ignore"), 1, "To scrutinize is to inspect carefully.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp18_1", "Complete the inverted sentence: 'Rarely ___ such dedication among students.'", listOf("we see", "do we see", "saw we", "we have seen"), 1, "After 'Rarely' at the start of a sentence, invert auxiliary + subject: 'do we see'."),
+                SkillQuizQuestion("gp18_2", "Complete with the Formal Subjunctive: 'It is imperative that every student ___ on time.'", listOf("is", "be", "are", "was"), 1, "The formal subjunctive uses the bare infinitive 'be'."),
+                SkillQuizQuestion("gp18_3", "Little ___ know that the surprise test was today.", listOf("he did", "did he", "he does", "does he"), 1, "'Little' at the beginning triggers inversion: 'Little did he know'.")
             )
         ),
+
+        // === BOX 19: Advance B (General - 4 Rooms) ===
         LevelSeed(
-            id = "lvl_19_advanced_b",
+            id = "lvl_19_advance_b",
             order = 19,
             track = DiplomaTrack.ADVANCED_DIPLOMA,
-            stageGroup = "Advanced Mastery Block",
-            title = "Advanced B",
+            stageGroup = "Stage 6 • Advance Mastery Block (Boxes 18–21)",
+            title = "Advance B",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "ADVB-206",
-            sizeMb = 20.8f,
-            badgeName = "Subjunctive & Discourse Sage",
-            emoji = "💎",
-            badgeDesc = "Completed Advanced B (45 Hrs): the formal Subjunctive mood, participle clauses, and register shifting.",
-            skills = listOf("Subjunctive Mood", "Participle Clauses", "Register Shifting", "Synthesis"),
-            topicFocus = "Using participle clauses for conciseness, formal subjunctive (It is vital that he attend), and shifting between formal/informal registers.",
+            sizeMb = 19.6f,
+            badgeName = "Nuance & Discourse Strategist",
+            emoji = "🧠",
+            badgeDesc = "Completed Box 19 (Advance B): Academic hedging, passive reporting structures, and idiomatic precision.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Academic Hedging, Impersonal Passive Reporting ('It is widely believed that... / X is thought to have...'), and Collocations.",
             vocab = listOf(
-                "Imperative" to "Of vital importance; crucial.",
-                "Albeit" to "Although; even though.",
-                "Nuance" to "A subtle difference in meaning, expression, or sound.",
-                "Synthesize" to "Combine ideas from multiple sources into a coherent whole."
+                VocabWordItem("v19_1", "Plausible", "Seeming reasonable or probable.", "معقول / محتمل", "The researcher offered a plausible explanation for the findings.", "Adjective"),
+                VocabWordItem("v19_2", "Mitigate", "Make less severe, serious, or painful.", "يخفف من حدة", "Preparation helps mitigate exam anxiety.", "Verb"),
+                VocabWordItem("v19_3", "Consensus", "A general agreement among a group of people.", "إجماع / توافق آراء", "There is a growing consensus that active recall is the best study method.", "Noun"),
+                VocabWordItem("v19_4", "Discrepancy", "A lack of compatibility or similarity between two or more facts.", "تفاوت / تضارب", "The auditor noticed a small discrepancy in the report.", "Noun")
             ),
-            grammarRule = "Participle Clauses replace full adverbial clauses: 'Having finished her homework, Maya joined the game' (= After she had finished...).",
-            assignmentTask = "Transform an informal 150-word blog post into a high-register academic briefing using Participle Clauses and the Subjunctive.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "It is essential that every candidate ___ on time for the examination.", listOf("arrives", "arrive", "arrived", "arriving"), 1, "The formal mandative subjunctive uses the bare infinitive ('arrive') after 'It is essential that...'."),
-                SkillQuizQuestion("q2", "___ by the results, the scientists repeated the experiment.", listOf("Surprising", "Surprised", "Having surprise", "To surprise"), 1, "Use a past participle ('Surprised') when the subject experienced the feeling passively."),
-                SkillQuizQuestion("q3", "Which word is a formal synonym for 'although'?", listOf("Albeit", "Plus", "Anyway", "Besides"), 0, "'Albeit' is a concise formal conjunction meaning 'although'.")
+            grammarRule = "Impersonal Passive Reporting: Use 'It is said/believed/reported that...' or 'Subject + is/are thought to + Base Verb / to have + V3' to present objective academic claims.",
+            grammarFormula = "It is widely believed that + Clause | Subject + is thought to have + V3",
+            affirmativeExamples = listOf("It is widely accepted that bilingualism enhances cognitive flexibility.", "The manuscript is believed to have been written in the twelfth century."),
+            negativeExamples = listOf("The new regulation is not expected to cause any delay."),
+            questionExamples = listOf("How do we convert 'People think he left early' into an impersonal passive?"),
+            assignmentTask = "Rewrite 4 general claims using Impersonal Passive structures ('It is reported that...' and '...is believed to have...').",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp19_1", "What does 'Mitigate' mean?", listOf("Make worse", "Make less severe or serious", "Celebrate", "Exaggerate"), 1, "To mitigate means to reduce the severity of something."),
+                SkillQuizQuestion("vp19_2", "What is a 'Consensus'?", listOf("A heated argument", "General agreement among a group", "A private secret", "A sudden cancellation"), 1, "Consensus means general agreement."),
+                SkillQuizQuestion("vp19_3", "If an explanation seems reasonable and believable, it is ___.", listOf("plausible", "impossible", "reckless", "invisible"), 0, "'Plausible' means reasonable or probable.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp19_1", "Complete the impersonal passive: 'The ancient city is believed ___ been founded 3,000 years ago.'", listOf("that", "to have", "having", "for"), 1, "'is believed + to have + V3' refers to a past event."),
+                SkillQuizQuestion("gp19_2", "Which sentence uses academic hedging appropriately?", listOf("This proves 100% that everyone always succeeds.", "The evidence suggests that regular practice tends to improve retention.", "Nobody ever forgets anything.", "It is impossible to disagree."), 1, "Words like 'suggests' and 'tends to' provide measured academic hedging."),
+                SkillQuizQuestion("gp19_3", "Choose the correct preposition: 'There is a strong correlation ___ study habits and test scores.'", listOf("between", "among", "with", "for"), 0, "Use 'correlation between X and Y'.")
             )
         ),
+
+        // === BOX 20: Advance C (General - 4 Rooms) ===
         LevelSeed(
-            id = "lvl_20_advanced_c",
+            id = "lvl_20_advance_c",
             order = 20,
             track = DiplomaTrack.ADVANCED_DIPLOMA,
-            stageGroup = "Advanced Mastery Block",
-            title = "Advanced C",
+            stageGroup = "Stage 6 • Advance Mastery Block (Boxes 18–21)",
+            title = "Advance C",
+            boxType = BoxArchitectureType.GENERAL_4_ROOMS,
             hours = 45,
             code = "ADVC-207",
-            sizeMb = 21.4f,
-            badgeName = "C1-C2 Fluency Sovereign",
+            sizeMb = 20.1f,
+            badgeName = "C1/C2 Rhetoric & Synthesis Master",
             emoji = "👑",
-            badgeDesc = "Conquered Advanced C (45 Hrs): nominalization, abstract argumentation, and idiomatic precision.",
-            skills = listOf("Nominalization", "Abstract Debate", "Academic Style", "Precision"),
-            topicFocus = "Turning verb-heavy sentences into elegant noun phrases (nominalization), hedging claims, and critical analysis.",
+            badgeDesc = "Completed Box 20 (Advance C): Advanced ellipsis, substitution, and C1/C2 academic synthesis.",
+            skills = listOf("Vocabulary", "Grammar Explanation", "Vocab Practice", "Grammar Practice"),
+            topicFocus = "Ellipsis & Substitution (avoiding repetition in advanced prose), Advanced Discourse Markers, and C1/C2 Precision.",
             vocab = listOf(
-                "Proliferation" to "Rapid increase in the number or amount of something.",
-                "Corroborate" to "Confirm or give support to a statement or finding.",
-                "Paradigm shift" to "A fundamental change in approach or underlying assumptions.",
-                "Equivocal" to "Open to more than one interpretation; ambiguous."
+                VocabWordItem("v20_1", "Ubiquitous", "Present, appearing, or found everywhere.", "منتشر في كل مكان", "Smartphones have become ubiquitous in modern education.", "Adjective"),
+                VocabWordItem("v20_2", "Pragmatic", "Dealing with things sensibly and realistically in a practical way.", "عملي / واقعي", "We need a pragmatic approach to time management.", "Adjective"),
+                VocabWordItem("v20_3", "Notwithstanding", "In spite of; nevertheless.", "على الرغم من ذلك", "Notwithstanding the initial difficulties, the project succeeded brilliantly.", "Preposition/Adverb"),
+                VocabWordItem("v20_4", "Synthesize", "Combine multiple sources or ideas into a coherent whole.", "يدمج / يؤلف بين الأفكار", "Advanced learners synthesize ideas from multiple readings.", "Verb")
             ),
-            grammarRule = "Academic Nominalization: Instead of 'Because cities grew rapidly, pollution increased', write 'The rapid growth of cities led to an increase in pollution.'",
-            assignmentTask = "Present and defend a 300-word critical synthesis paper in class using academic nominalization and evidence-based hedging.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Which sentence uses academic nominalization most effectively?", listOf("The implementation of the new policy improved efficiency.", "They put the new policy in and things got better.", "People worked faster because of rules.", "The rules made it good."), 0, "'The implementation of...' turns a verb into a formal academic noun phrase."),
-                SkillQuizQuestion("q2", "What does 'corroborate' mean in academic research?", listOf("Contradict completely", "Confirm or support with evidence", "Forget about", "Guess randomly"), 1, "To corroborate is to confirm or give support to a claim."),
-                SkillQuizQuestion("q3", "Which phrase best hedges a scientific claim?", listOf("The data suggests a strong correlation...", "This proves 100% forever...", "Everyone knows...", "Obviously it is..."), 0, "'The data suggests...' is precise and academically cautious.")
+            grammarRule = "Ellipsis & Substitution: Replace repeated clauses with 'so / not' ('I believe so', 'If not...') or auxiliary verbs ('She has finished, and so have I') to achieve native-like conciseness.",
+            grammarFormula = "Auxiliary Substitution: so + Aux + Subject | Clause Substitution: think/hope/believe so",
+            affirmativeExamples = listOf("Sara passed with three stars, and so did her study partner.", "Are we ready for Box 21? I certainly hope so."),
+            negativeExamples = listOf("He hasn't missed a single session, and neither have I."),
+            questionExamples = listOf("How does substitution prevent repetitive phrasing in advanced essays?"),
+            assignmentTask = "Complete the C1/C2 vocabulary and grammar mastery drills to unlock the final capstone box.",
+            vocabPractice = listOf(
+                SkillQuizQuestion("vp20_1", "What does 'Ubiquitous' mean?", listOf("Extremely rare", "Found or appearing everywhere", "Broken", "Temporary"), 1, "'Ubiquitous' means present everywhere."),
+                SkillQuizQuestion("vp20_2", "A sensible, practical approach to solving problems is called ___.", listOf("pragmatic", "chaotic", "fragile", "obscure"), 0, "'Pragmatic' means practical and realistic."),
+                SkillQuizQuestion("vp20_3", "What does 'Notwithstanding' mean?", listOf("Because of", "In spite of / nevertheless", "In addition to", "Before"), 1, "'Notwithstanding' is a formal synonym for 'despite'.")
+            ),
+            grammarPractice = listOf(
+                SkillQuizQuestion("gp20_1", "Complete the substitution: 'I haven't visited London yet, and ___ has my brother.'", listOf("so", "neither", "either", "too"), 1, "After a negative clause, use 'neither + auxiliary + subject'."),
+                SkillQuizQuestion("gp20_2", "Complete with clause substitution: 'Will the exam be difficult? I don't think ___.'", listOf("it", "that", "so", "this"), 2, "'I don't think so' substitutes for the previous clause."),
+                SkillQuizQuestion("gp20_3", "Choose the correct structure: '___ the rain, the outdoor ceremony continued.'", listOf("Although", "Notwithstanding", "Even though", "Whereas"), 1, "'Notwithstanding' is a preposition that can be followed directly by a noun phrase ('the rain').")
             )
         ),
+
+        // === BOX 21: Skills 6 (Listening & Speaking Skills - 2 Specialized Rooms) ===
         LevelSeed(
-            id = "lvl_21_skills_ls_3",
+            id = "lvl_21_skills_ls_6",
             order = 21,
             track = DiplomaTrack.ADVANCED_DIPLOMA,
-            stageGroup = "Advanced Mastery Block",
-            title = "Skills (L&S) III",
+            stageGroup = "Stage 6 • Advance Mastery Block (Boxes 18–21)",
+            title = "Skills 6",
+            boxType = BoxArchitectureType.SKILLS_LS_2_ROOMS,
             hours = 45,
-            code = "SLS3-208",
-            sizeMb = 22.0f,
-            badgeName = "Keynote Orator Laureate",
+            code = "SLS6-208",
+            sizeMb = 21.5f,
+            badgeName = "Grand Master Communicator (Box 21)",
             emoji = "🏆",
-            badgeDesc = "Graduated the Advanced Diploma with Skills (L&S) III (45 Hrs): TED-style keynote speaking, panel moderation, and seminar listening.",
-            skills = listOf("Keynote Speaking", "Seminar Moderation", "Rhetorical Devices", "Critical Listening"),
-            topicFocus = "Rhetorical triads, persuasive pacing, moderating a live panel discussion, and decoding fast-paced academic lectures.",
+            badgeDesc = "Graduated Box 21 (Skills 6): Advanced academic listening dictation and fluent C1 voice responses!",
+            skills = listOf("Listening & Vocabulary Dictation Room", "Speaking & Voice Interaction Room"),
+            topicFocus = "Capstone academic lecture dictation, advanced vocabulary capture, and C1/C2 spoken argument & pronunciation evaluation.",
             vocab = listOf(
-                "Rhetorical question" to "A question asked for dramatic effect rather than to get an answer.",
-                "Rule of Three (Tricolon)" to "Grouping ideas in threes for rhythm and memorability.",
-                "Devil's advocate" to "Someone who expresses a contentious opinion to provoke debate.",
-                "Articulate" to "Having or showing the ability to speak fluently and coherently."
+                VocabWordItem("v21_1", "To sum up", "Used to introduce a concise final summary of a presentation.", "خلاصة القول / باختصار", "To sum up, consistent practice across all four skills guarantees success.", "Presentation"),
+                VocabWordItem("v21_2", "Undeniably", "In a way that cannot be disputed or doubted.", "مما لا شك فيه", "Mastering a second language undeniably opens global career doors.", "Adverb"),
+                VocabWordItem("v21_3", "Crucial milestone", "A decisive turning point or achievement.", "إنجاز مفصلي هام", "Completing Box 21 is a crucial milestone in your academic career.", "Collocation"),
+                VocabWordItem("v21_4", "Fluency and accuracy", "The twin goals of natural flow and grammatical correctness.", "الطلاقة والدقة اللغوية", "Our curriculum balances spoken fluency and grammatical accuracy.", "Core Concept")
             ),
-            grammarRule = "Rhetorical Parallelism: Match grammatical structures in triads: 'Tell me and I forget. Teach me and I remember. Involve me and I learn.'",
-            assignmentTask = "Deliver a 5-minute Capstone Keynote Speech to your class and teacher, followed by a live Q&A defense.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "'Government of the people, by the people, for the people' is an example of:", listOf("Tricolon / Parallelism", "Passive voice", "Past Perfect", "Spelling error"), 0, "Repeating three parallel prepositional phrases is a classic tricolon."),
-                SkillQuizQuestion("q2", "What does 'playing devil's advocate' mean in a seminar?", listOf("Testing an argument by taking the opposing side", "Ending the meeting early", "Agreeing with everyone silently", "Reading from a dictionary"), 0, "It means raising counterpoints to test the strength of an argument."),
-                SkillQuizQuestion("q3", "During a Q&A session, what is a strong strategy before answering a complex question?", listOf("Briefly paraphrase the question to confirm understanding", "Ignore the question", "Walk off the stage", "Change the subject"), 0, "Paraphrasing confirms you understood the question and gives you a moment to structure your answer.")
-            )
-        ),
-
-        // === TOEFL TEST PREPARATION (Level 22 - 100 Hrs) ===
-        LevelSeed(
-            id = "lvl_22_toefl_prep",
-            order = 22,
-            track = DiplomaTrack.TOEFL_PREP,
-            stageGroup = "100-Hour Intensive Exam Track",
-            title = "TOEFL Test Preparation",
-            hours = 100,
-            code = "TOEFL-301",
-            sizeMb = 28.5f,
-            badgeName = "TOEFL iBT Grandmaster (100h)",
-            emoji = "🎯",
-            badgeDesc = "Completed the intensive 100-Hour TOEFL Test Preparation track covering Reading, Listening, Integrated Speaking, and Academic Writing!",
-            skills = listOf("TOEFL Reading", "TOEFL Listening", "Integrated Speaking", "Academic Discussion Writing"),
-            topicFocus = "Mastering all 4 TOEFL iBT sections: academic reading passages, campus/lecture listening, 45–60s timed speaking responses, and Integrated + Academic Discussion writing.",
-            vocab = listOf(
-                "Factual & Negative Factual Questions" to "TOEFL Reading items asking what is true or NOT true according to the passage.",
-                "Integrated Task" to "Combining reading notes and lecture audio into a single spoken or written response.",
-                "Pacing Strategy" to "Managing strict exam timers across reading passages and speaking prep windows.",
-                "Synthesize the Lecture" to "Explain how the professor's examples support or challenge the reading."
+            grammarRule = "Capstone Spoken Rhetoric: Structure spoken answers with a thesis statement, a supporting causal clause, and a concluding summary.",
+            grammarFormula = "Thesis Statement -> Supporting Evidence -> Concluding Takeaway",
+            affirmativeExamples = listOf("Mastering English requires both daily listening exposure and active speaking practice."),
+            negativeExamples = listOf("Not only does passive reading build vocabulary, but active speaking also cements fluency."),
+            questionExamples = listOf("How will you apply the English skills you mastered across all 21 boxes in your future career?"),
+            assignmentTask = "Complete the 3 advanced dictation passages and deliver your 3 capstone spoken responses aloud.",
+            vocabPractice = emptyList(),
+            grammarPractice = emptyList(),
+            listeningExercises = listOf(
+                ListeningDictationExercise(
+                    id = "ls6_dict_1",
+                    title = "Lecture 1 • The Science of Language Mastery",
+                    audioTranscript = "Consistent daily practice is the most reliable path to fluency",
+                    hintText = "Listen for the superlative adjective ('the most reliable') and the final noun.",
+                    keyWordsToExtract = listOf(
+                        "consistent" to "مستمر / منتظم",
+                        "reliable" to "موثوق"
+                    )
+                ),
+                ListeningDictationExercise(
+                    id = "ls6_dict_2",
+                    title = "Lecture 2 • Global Career Communication",
+                    audioTranscript = "Articulate speakers express complex ideas with clarity and confidence",
+                    hintText = "Listen for the opening adjective meaning 'fluent and clear' and the final two nouns.",
+                    keyWordsToExtract = listOf(
+                        "articulate" to "فصيح / بليغ",
+                        "clarity" to "وضوح"
+                    )
+                ),
+                ListeningDictationExercise(
+                    id = "ls6_dict_3",
+                    title = "Lecture 3 • Capstone Graduation Message",
+                    audioTranscript = "Completing all twenty one boxes is a remarkable academic achievement",
+                    hintText = "Listen for the number of boxes and the final two-word phrase.",
+                    keyWordsToExtract = listOf(
+                        "remarkable" to "رائع / استثنائي",
+                        "academic achievement" to "إنجاز أكاديمي"
+                    )
+                )
             ),
-            grammarRule = "TOEFL Integrated Template: 'According to the reading passage, [Main Point]. In the lecture, the professor casts doubt on / supports this by explaining that...'",
-            assignmentTask = "Complete a full timed in-class TOEFL Simulation (Reading, Listening, 4 Speaking Tasks, and 2 Writing Tasks) and review your rubric score with your instructor.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "In the TOEFL Integrated Writing task, your primary job is to:", listOf("Give only your personal childhood story", "Summarize how the lecture points relate to the reading passage", "Copy the reading word-for-word", "Write a poem"), 1, "Integrated Writing tests how accurately you connect the lecture's arguments to the reading passage."),
-                SkillQuizQuestion("q2", "How much preparation time do you get for TOEFL Independent Speaking (Task 1)?", listOf("15 seconds prep, 45 seconds speaking", "10 minutes prep", "No timer at all", "2 hours"), 0, "Task 1 gives 15 seconds to prepare and 45 seconds to speak."),
-                SkillQuizQuestion("q3", "When tackling a TOEFL Vocabulary-in-Context question, you should:", listOf("Check how the word functions in the surrounding sentence", "Pick the longest word", "Skip the sentence completely", "Choose an unrelated rhyme"), 0, "Context clues in the sentence ensure you pick the meaning used by the author.")
-            )
-        ),
-
-        // === PROFESSIONAL TEACHING PROGRAM - PTP (Levels 23-25) ===
-        LevelSeed(
-            id = "lvl_23_tkt",
-            order = 23,
-            track = DiplomaTrack.PTP_PROGRAM,
-            stageGroup = "Professional Teaching Program (PTP)",
-            title = "TKT",
-            hours = 20,
-            code = "TKT-401",
-            sizeMb = 14.6f,
-            badgeName = "TKT Pedagogy Specialist",
-            emoji = "📘",
-            badgeDesc = "Completed TKT (Teaching Knowledge Test - 20 Hrs): language analysis, lesson planning frameworks, and learner styles.",
-            skills = listOf("Lesson Planning", "Concept Checking (CCQs)", "Learner Needs", "Error Correction"),
-            topicFocus = "Cambridge TKT Modules 1–3: describing language skills, PPP vs TBL lesson frameworks, and Concept Checking Questions (CCQs).",
-            vocab = listOf(
-                "CCQs (Concept Checking Questions)" to "Targeted questions teachers ask to verify students understand a grammar/vocab concept.",
-                "ICQs (Instruction Checking Questions)" to "Short questions to confirm students know what to do in an activity.",
-                "Scaffolding" to "Step-by-step support given to learners so they can achieve a task.",
-                "PPP (Presentation, Practice, Production)" to "Classic three-stage lesson staging model."
-            ),
-            grammarRule = "Golden Rule of CCQs: Never use the target grammar/word inside the Concept Checking Question itself; break the meaning into simple facts.",
-            assignmentTask = "Write 3 Concept Checking Questions (CCQs) and a 45-minute PPP Lesson Plan for any Beginner or Elementary grammar point.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "Why do teachers ask ICQs (Instruction Checking Questions) before starting group work?", listOf("To confirm students understand the activity instructions", "To test spelling", "To end the class early", "To grade final exams"), 0, "ICQs like 'Are you working alone or in pairs?' prevent confusion before an activity begins."),
-                SkillQuizQuestion("q2", "In the PPP lesson framework, what does the third 'P' stand for?", listOf("Punishment", "Production (freer communicative use)", "Pronouns", "Punctuation"), 1, "Presentation -> Practice -> Production."),
-                SkillQuizQuestion("q3", "What is 'scaffolding' in classroom teaching?", listOf("Providing structured support and models that are gradually removed as learners gain confidence", "Giving a test on day one without teaching", "Speaking for 60 minutes non-stop", "Cleaning the whiteboard"), 0, "Scaffolding supports students step-by-step toward independent mastery.")
-            )
-        ),
-        LevelSeed(
-            id = "lvl_24_tesol",
-            order = 24,
-            track = DiplomaTrack.PTP_PROGRAM,
-            stageGroup = "Professional Teaching Program (PTP)",
-            title = "TESOL",
-            hours = 40,
-            code = "TESOL-402",
-            sizeMb = 21.0f,
-            badgeName = "TESOL Methodology Master",
-            emoji = "🌍",
-            badgeDesc = "Completed TESOL (40 Hrs): Communicative Language Teaching (CLT), classroom management, and assessment design.",
-            skills = listOf("Communicative Teaching", "TTT vs STT", "Classroom Management", "Rubric Design"),
-            topicFocus = "Maximizing Student Talking Time (STT), designing communicative tasks, differentiated instruction, and formative vs summative assessment.",
-            vocab = listOf(
-                "STT vs TTT" to "Student Talking Time vs Teacher Talking Time — aim to maximize STT!",
-                "Formative Assessment" to "Ongoing in-class checks that help students improve while learning.",
-                "Summative Assessment" to "End-of-unit evaluation measuring overall achievement.",
-                "Information Gap Activity" to "A task where partners have different pieces of info and must speak to complete it."
-            ),
-            grammarRule = "Task-Based Learning (TBL) Cycle: Pre-Task (introduce topic) -> Task Cycle (students collaborate & report) -> Language Focus (analyze & practice).",
-            assignmentTask = "Design an original Information Gap speaking activity and a 4-criteria grading rubric for an Intermediate ESL class.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "In a communicative language classroom, teachers generally aim to:", listOf("Maximize Student Talking Time (STT) and keep Teacher Talking Time (TTT) purposeful", "Speak for 100% of the lesson", "Forbid pair work", "Only translate word lists silently"), 0, "Students learn to communicate by actively using the language (high STT)."),
-                SkillQuizQuestion("q2", "What is an 'Information Gap' activity?", listOf("Student A has info Student B needs, forcing real communication", "A silent reading test", "A 10-minute break", "Copying from the board"), 0, "Information gaps create a genuine need for students to talk to each other."),
-                SkillQuizQuestion("q3", "Ongoing quizzes and teacher feedback given during a unit are examples of:", listOf("Formative assessment", "Final graduation ceremony", "School holidays", "Attendance sheets"), 0, "Formative assessment monitors learning in progress.")
-            )
-        ),
-        LevelSeed(
-            id = "lvl_25_teaching_practice",
-            order = 25,
-            track = DiplomaTrack.PTP_PROGRAM,
-            stageGroup = "Professional Teaching Program (PTP)",
-            title = "Teaching Practice",
-            hours = 40,
-            code = "PRAC-403",
-            sizeMb = 24.0f,
-            badgeName = "Master Classroom Practitioner",
-            emoji = "🌟",
-            badgeDesc = "Completed 40 Hours of live Teaching Practice! Observed lessons, delivered micro-teaching demos, and graduated the full Institute Curriculum!",
-            skills = listOf("Live Teaching", "Peer Observation", "Self-Reflection", "Boardwork & Pacing"),
-            topicFocus = "Delivering observed lessons, managing real classroom dynamics, reflective teaching journals, and warmers/coolers.",
-            vocab = listOf(
-                "Micro-teaching" to "Practicing a short 15–20 minute lesson segment with peers and trainer feedback.",
-                "Delayed Error Correction" to "Noting errors during fluency work and reviewing them on the board afterward.",
-                "Rapport" to "A warm, trusting, and harmonious relationship between teacher and students.",
-                "Reflective Action Plan" to "Evaluating what went well in a lesson and what to adjust next time."
-            ),
-            grammarRule = "Error Correction Timing: Correct immediately during accuracy drills (on-the-spot), but use delayed correction during fluency speaking tasks so you don't interrupt student flow.",
-            assignmentTask = "Deliver two full 45-minute observed practicum lessons, complete 3 peer observation sheets, and present your Reflective Teaching Portfolio.",
-            quiz = listOf(
-                SkillQuizQuestion("q1", "When students are engaged in a lively fluency roleplay, when is the best time to correct minor grammar slips?", listOf("After the roleplay using delayed board correction", "Interrupt every 3 seconds loudly", "Never teach grammar again", "Cancel the activity"), 0, "Delayed correction preserves student confidence and communicative flow during fluency tasks."),
-                SkillQuizQuestion("q2", "What is the main goal of a 5-minute 'Warmer' at the start of class?", listOf("Engage students, activate prior knowledge, and switch their minds into English", "Give a surprise final exam", "Take a nap", "Assign homework for next month"), 0, "Warmers build energy and activate English thinking right away."),
-                SkillQuizQuestion("q3", "After teaching an observed practicum lesson, a reflective teacher first:", listOf("Identifies strengths and concrete action points based on student learning outcomes", "Throws away the lesson plan", "Blames the textbook", "Skips feedback"), 0, "Reflective practice focuses on how effectively students achieved the lesson aims.")
+            speakingPrompts = listOf(
+                SpeakingVoicePrompt(
+                    id = "ls6_spk_1",
+                    questionAudioText = "How will mastering English help you achieve your academic and career goals in the future?",
+                    arabicPromptHint = "أجب بصوتك: كيف سيساعدك إتقان الإنجليزية في تحقيق أهدافك الأكاديمية والمهنية مستقبلاً؟",
+                    sampleTargetAnswer = "Mastering English will help me achieve my academic and career goals by communicating with confidence",
+                    requiredKeywords = listOf("English", "goals", "confidence"),
+                    grammarFocusLabel = "Future Career Vision"
+                ),
+                SpeakingVoicePrompt(
+                    id = "ls6_spk_2",
+                    questionAudioText = "What advice would you give to a new student starting at Box 1 Essence?",
+                    arabicPromptHint = "أجب بصوتك: ما النصيحة التي تقدمها لطالب جديد يبدأ من المستوى الأول Essence؟",
+                    sampleTargetAnswer = "I would advise a new student to practice vocabulary and speaking every single day",
+                    requiredKeywords = listOf("practice", "vocabulary", "day"),
+                    grammarFocusLabel = "Giving Structured Advice"
+                ),
+                SpeakingVoicePrompt(
+                    id = "ls6_spk_3",
+                    questionAudioText = "Summarize what you enjoyed most about learning across the twenty one boxes.",
+                    arabicPromptHint = "أجب بصوتك: لخّص أكثر ما استمتعت به خلال رحلة التعلم عبر المستويات الـ 21.",
+                    sampleTargetAnswer = "I enjoyed earning stars in the vocabulary grammar listening and speaking rooms",
+                    requiredKeywords = listOf("enjoyed", "speaking"),
+                    grammarFocusLabel = "Capstone Reflection"
+                )
             )
         )
     )
 
     val allLevels: List<CurriculumLevel> = seeds.map { seed ->
+        val materials = buildList {
+            add(
+                StudyMaterial(
+                    id = "${seed.id}_vocab",
+                    title = "${seed.title} • Vocabulary Bank",
+                    category = MaterialCategory.VOCABULARY,
+                    summary = seed.topicFocus,
+                    contentBody = "Core topic focus for Box ${seed.order} (${seed.title}): ${seed.topicFocus}\nPractice pronouncing each phrase aloud and review your in-app Vocabulary Bank.",
+                    keyPhrases = seed.vocab.map { it.word to "${it.meaning} (${it.arabicHint})" },
+                    xpReward = 30
+                )
+            )
+            add(
+                StudyMaterial(
+                    id = "${seed.id}_grammar",
+                    title = "${seed.title} • Grammar Explanation",
+                    category = MaterialCategory.GRAMMAR,
+                    summary = "Key Grammar Rule & Examples",
+                    contentBody = "${seed.grammarRule}\n\nFormula: ${seed.grammarFormula}",
+                    keyPhrases = seed.affirmativeExamples.map { it to "Affirmative Example" } +
+                        seed.nominalVsVerbalNotes,
+                    xpReward = 35
+                )
+            )
+        }
+
+        val assignments = listOf(
+            LevelAssignment(
+                id = "${seed.id}_assign_1",
+                title = "${seed.title} Practical Task",
+                typeLabel = seed.boxType.title,
+                instructions = seed.assignmentTask,
+                rubricCriteria = "Earn at least 2/3 Stars (⭐⭐) across this box's practice rooms to unlock Box ${seed.order + 1}.",
+                maxPoints = 100,
+                xpReward = 50
+            )
+        )
+
+        val combinedQuiz = (seed.vocabPractice + seed.grammarPractice).ifEmpty {
+            listOf(
+                SkillQuizQuestion(
+                    id = "${seed.id}_q1",
+                    prompt = "Which skill is the primary focus of ${seed.title}?",
+                    options = listOf("Interactive Listening & Speaking", "Cooking", "Driving", "Painting"),
+                    correctIndex = 0,
+                    explanation = "${seed.title} focuses on active communication and accuracy."
+                )
+            )
+        }
+
         CurriculumLevel(
             id = seed.id,
             orderIndex = seed.order,
@@ -750,67 +1223,25 @@ object CurriculumCatalog {
             badgeEmoji = seed.emoji,
             badgeDescription = seed.badgeDesc,
             focusSkills = seed.skills,
-            materials = listOf(
-                StudyMaterial(
-                    id = "${seed.id}_mat_vocab",
-                    title = "${seed.title} • Core Vocabulary & Phrases",
-                    category = MaterialCategory.VOCABULARY,
-                    summary = "Tap cards to flip and master key phrases for ${seed.title} (${seed.hours} Hrs).",
-                    contentBody = "Focus Area: ${seed.topicFocus}\nPractice saying each phrase aloud three times with clear stress and intonation.",
-                    keyPhrases = seed.vocab,
-                    xpReward = 30
-                ),
-                StudyMaterial(
-                    id = "${seed.id}_mat_grammar",
-                    title = "${seed.title} • Grammar & Language Rulebook",
-                    category = MaterialCategory.GRAMMAR,
-                    summary = "Essential language pattern and classroom examples for this unit.",
-                    contentBody = seed.grammarRule,
-                    keyPhrases = listOf(
-                        "Golden Rule" to seed.grammarRule,
-                        "Unit Focus" to seed.topicFocus
-                    ),
-                    xpReward = 35
-                ),
-                StudyMaterial(
-                    id = "${seed.id}_mat_skills",
-                    title = "${seed.title} • Interactive Skill Workshop",
-                    category = if (seed.skills.any { it.contains("Listening") || it.contains("Speaking") }) {
-                        MaterialCategory.LISTENING_SPEAKING
-                    } else {
-                        MaterialCategory.READING_WRITING
-                    },
-                    summary = "Guided workshop covering ${seed.skills.joinToString(", ")}.",
-                    contentBody = "In this ${seed.hours}-hour module, students practice ${seed.skills.joinToString(" & ")} through pair work, guided reading, and interactive classroom drills.",
-                    keyPhrases = seed.skills.map { skill ->
-                        skill to "Core competency assessed locally in class for ${seed.title}."
-                    },
-                    xpReward = 35
-                )
+            materials = materials,
+            assignments = assignments,
+            quizQuestions = combinedQuiz,
+            boxType = seed.boxType,
+            vocabBankItems = seed.vocab,
+            grammarContent = GrammarRoomContent(
+                ruleTitle = "${seed.title} Grammar Rule",
+                formulaPattern = seed.grammarFormula,
+                explanationBody = seed.grammarRule,
+                affirmativeExamples = seed.affirmativeExamples,
+                negativeExamples = seed.negativeExamples,
+                questionExamples = seed.questionExamples,
+                nominalVsVerbalNotes = seed.nominalVsVerbalNotes
             ),
-            assignments = listOf(
-                LevelAssignment(
-                    id = "${seed.id}_assign_1",
-                    title = "${seed.title} Classroom Mission",
-                    typeLabel = "In-Class Activity",
-                    instructions = seed.assignmentTask,
-                    rubricCriteria = "Accuracy (25 pts) • Fluency/Clarity (25 pts) • Vocabulary Use (25 pts) • Classroom Participation (25 pts)",
-                    maxPoints = 100,
-                    xpReward = 50
-                ),
-                LevelAssignment(
-                    id = "${seed.id}_assign_2",
-                    title = "${seed.title} Workbook & Portfolio Check",
-                    typeLabel = "Workbook & Skill Log",
-                    instructions = "Complete the unit workbook exercises for ${seed.title} (${seed.hours} Hrs) and review corrections with your teacher in class.",
-                    rubricCriteria = "Completeness (50 pts) • Self-Correction & Neatness (50 pts)",
-                    maxPoints = 100,
-                    xpReward = 40
-                )
-            ),
-            quizQuestions = seed.quiz
+            vocabPracticeQuestions = seed.vocabPractice,
+            grammarPracticeQuestions = seed.grammarPractice,
+            rwSentenceExercises = seed.rwExercises,
+            listeningExercises = seed.listeningExercises,
+            speakingPrompts = seed.speakingPrompts
         )
     }
-
-    fun getLevelById(id: String): CurriculumLevel? = allLevels.find { it.id == id }
 }

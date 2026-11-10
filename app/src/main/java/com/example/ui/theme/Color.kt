@@ -2,28 +2,24 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Playful Game-Like Palette
-val QuestIndigo = Color(0xFF3B4CCA)
-val QuestIndigoDark = Color(0xFF1E2985)
-val QuestIndigoLight = Color(0xFFE0E7FF)
+// Official Excel ETA Palette (Sampled from Logo)
+val EtaNavy = Color(0xFF0B1B6D)
+val EtaNavyDark = Color(0xFF061042)
+val EtaNavyLight = Color(0xFFE8EDF8)
 
-val QuestEmerald = Color(0xFF10B981)
-val QuestEmeraldDark = Color(0xFF047857)
-val QuestEmeraldLight = Color(0xFFD1FAE5)
+val EtaRed = Color(0xFFC40D1E)
+val EtaRedDark = Color(0xFF8E0814)
+val EtaRedLight = Color(0xFFFFEBEE)
 
-val QuestGold = Color(0xFFF59E0B)
-val QuestGoldDark = Color(0xFFB45309)
-val QuestGoldLight = Color(0xFFFEF3C7)
+val EtaBlue = Color(0xFF0E71C8)
+val EtaBlueDark = Color(0xFF0A518F)
+val EtaBlueLight = Color(0xFFE3F2FD)
 
-val QuestTeal = Color(0xFF0D9488)
-val QuestTealDark = Color(0xFF115E59)
-val QuestTealLight = Color(0xFFCCFBF1)
+val EtaGold = Color(0xFFF59E0B)
+val EtaEmerald = Color(0xFF10B981)
+val EtaCoral = Color(0xFFF43F5E)
 
-val QuestCoral = Color(0xFFF43F5E)
-val QuestPurple = Color(0xFF8B5CF6)
-val QuestSky = Color(0xFF0EA5E9)
-
-val BackgroundCream = Color(0xFFF8FAFC)
+val BackgroundCream = Color(0xFFF8FAFD)
 val SurfaceCard = Color(0xFFFFFFFF)
-val DarkBackground = Color(0xFF0F172A)
-val DarkSurface = Color(0xFF1E293B)
+val DarkBackground = Color(0xFF080D20)
+val DarkSurface = Color(0xFF101938)

@@ -1,6 +1,6 @@
 {
-  "name": "Diploma Quest",
-  "description": "An offline, gamified learning map and skill assessment tracker for the institute's Intermediate Diploma, Advanced Diploma, TOEFL, and PTP curriculum with teacher unlock codes, on-demand level resource caching, local classroom grading, and unit badges.",
+  "name": "Excel ETA",
+  "description": "Official offline learning map, skill assessment tracker, and custom curriculum management for Excel ETA For Training institutes.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

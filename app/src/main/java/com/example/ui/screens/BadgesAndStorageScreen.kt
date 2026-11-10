@@ -1,6 +1,5 @@
 package com.example.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,18 +47,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.R
 import com.example.data.CurriculumLevel
 import com.example.data.DiplomaTrack
 import com.example.ui.LevelNodeState
 import com.example.ui.QuestUiState
-import com.example.ui.theme.QuestEmerald
-import com.example.ui.theme.QuestGold
+import com.example.ui.theme.EtaGold
+import com.example.ui.theme.EtaNavy
+import com.example.ui.theme.EtaRed
 
 @Composable
 fun UnitBadgesScreen(
@@ -72,55 +69,55 @@ fun UnitBadgesScreen(
         modifier = Modifier
             .fillMaxSize()
             .testTag("unit_badges_screen"),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        contentPadding = PaddingValues(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = EtaNavy.copy(alpha = 0.08f)
                 )
             ) {
                 Row(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.EmojiEvents,
                         contentDescription = null,
-                        tint = QuestGold,
-                        modifier = Modifier.size(28.dp)
+                        tint = EtaGold,
+                        modifier = Modifier.size(24.dp)
                     )
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
                             text = "Unit Badges (${uiState.badgesEarnedCount}/25)",
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = EtaNavy
                         )
                         Text(
-                            text = "${uiState.totalHoursCompleted} Hrs Completed • ${uiState.totalStars} Stars",
+                            text = "${uiState.totalHoursCompleted} Hrs Completed • ${uiState.totalStars} Stars Earned",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
         }
 
-        items(DiplomaTrack.entries) { track ->
+        items(uiState.visibleDiplomaTracks) { track ->
             val isDiplomaUnlocked = uiState.isDiplomaUnlocked(track)
             val trackLevels = uiState.levels.filter { it.level.track == track }
             val earnedCount = trackLevels.count { it.isPassed }
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
+                Column(modifier = Modifier.padding(10.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -132,9 +129,9 @@ fun UnitBadgesScreen(
                                     imageVector = Icons.Default.Lock,
                                     contentDescription = "Locked Diploma",
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(15.dp)
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(5.dp))
                             }
                             Text(
                                 text = track.title,
@@ -143,32 +140,32 @@ fun UnitBadgesScreen(
                             )
                         }
                         Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = if (isDiplomaUnlocked) track.primaryColor.copy(alpha = 0.14f) else MaterialTheme.colorScheme.surfaceVariant
+                            shape = RoundedCornerShape(6.dp),
+                            color = if (isDiplomaUnlocked) track.primaryColor.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Text(
                                 text = if (isDiplomaUnlocked) "$earnedCount/${trackLevels.size}" else "Locked",
                                 style = MaterialTheme.typography.labelLarge,
                                 color = if (isDiplomaUnlocked) track.primaryColor else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
                             )
                         }
                     }
 
                     if (!isDiplomaUnlocked) {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(3.dp))
                         Text(
                             text = "Complete your current diploma to reveal badges in ${track.title}.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     } else {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                             trackLevels.chunked(2).forEach { rowItems ->
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
                                 ) {
                                     rowItems.forEach { node ->
                                         BadgeTileCard(
@@ -193,10 +190,10 @@ fun UnitBadgesScreen(
         val node = inspectedNode!!
         AlertDialog(
             onDismissRequest = { inspectedNode = null },
-            shape = RoundedCornerShape(22.dp),
+            shape = RoundedCornerShape(18.dp),
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = node.level.badgeEmoji, fontSize = 24.sp)
+                    Text(text = node.level.badgeEmoji, fontSize = 22.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(node.level.badgeName, style = MaterialTheme.typography.headlineMedium)
@@ -211,7 +208,7 @@ fun UnitBadgesScreen(
             text = {
                 Column {
                     Text(node.level.badgeDescription, style = MaterialTheme.typography.bodyMedium)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
                         text = if (node.isPassed) "✅ Earned! Grade: ${node.progress.inClassGrade}% (${node.starsEarned} Stars)"
                         else "🔒 Pass ${node.level.title} in class (60%+) to earn this badge!",
@@ -249,34 +246,34 @@ private fun BadgeTileCard(
     val earned = node.isPassed
     Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(10.dp))
             .border(
                 width = 1.dp,
-                color = if (earned) QuestGold else MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(12.dp)
+                color = if (earned) EtaGold else MaterialTheme.colorScheme.outlineVariant,
+                shape = RoundedCornerShape(10.dp)
             )
             .clickable(onClick = onClick),
-        color = if (earned) QuestGold.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        color = if (earned) EtaGold.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     ) {
         Row(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(30.dp)
+                    .size(28.dp)
                     .clip(CircleShape)
-                    .background(if (earned) QuestGold else Color(0xFF94A3B8)),
+                    .background(if (earned) EtaGold else Color(0xFF94A3B8)),
                 contentAlignment = Alignment.Center
             ) {
                 if (earned) {
-                    Text(text = node.level.badgeEmoji, fontSize = 15.sp)
+                    Text(text = node.level.badgeEmoji, fontSize = 14.sp)
                 } else {
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(13.dp)
                     )
                 }
             }
@@ -317,23 +314,23 @@ fun OfflineStorageScreen(
         modifier = Modifier
             .fillMaxSize()
             .testTag("offline_storage_screen"),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         item {
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
+                Column(modifier = Modifier.padding(10.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Storage,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
+                            tint = EtaNavy,
+                            modifier = Modifier.size(22.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Column {
                             Text(
                                 text = "Offline Pack Storage",
@@ -342,31 +339,31 @@ fun OfflineStorageScreen(
                             Text(
                                 text = String.format("Cached: %.1f MB (%d packs)", uiState.totalCachedMb, uiState.downloadedPacksCount),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary
+                                color = EtaNavy
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     LinearProgressIndicator(
                         progress = { usedFraction },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(6.dp)
-                            .clip(RoundedCornerShape(4.dp)),
-                        color = QuestEmerald
+                            .height(5.dp)
+                            .clip(RoundedCornerShape(3.dp)),
+                        color = Color(0xFF10B981)
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     OutlinedButton(
                         onClick = onClearCompletedPacks,
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(vertical = 6.dp, horizontal = 10.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(vertical = 4.dp, horizontal = 8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("clear_completed_packs_btn")
                     ) {
-                        Icon(Icons.Default.DeleteSweep, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.DeleteSweep, contentDescription = null, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text("Free Space from Passed Levels")
                     }
@@ -377,13 +374,13 @@ fun OfflineStorageScreen(
         items(visibleLevels, key = { it.level.id }) { node ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -402,20 +399,20 @@ fun OfflineStorageScreen(
                     if (node.isDownloaded) {
                         OutlinedButton(
                             onClick = { onRemoveLevelPack(node.level) },
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                            shape = RoundedCornerShape(6.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                         ) {
                             Text("Remove")
                         }
                     } else if (node.isUnlocked) {
                         Button(
                             onClick = { onDownloadLevel(node.level) },
-                            shape = RoundedCornerShape(8.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            shape = RoundedCornerShape(6.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = node.level.track.primaryColor)
                         ) {
-                            Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(14.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(Icons.Default.CloudDownload, contentDescription = null, modifier = Modifier.size(13.dp))
+                            Spacer(modifier = Modifier.width(3.dp))
                             Text("Download")
                         }
                     } else {
@@ -425,39 +422,6 @@ fun OfflineStorageScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun OfficialInstitutePosterScreen() {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag("official_poster_screen"),
-        contentPadding = PaddingValues(12.dp)
-    ) {
-        item {
-            ElevatedCard(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp)
-            ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Text(
-                        text = "🗺️ Official Institute Learning Map",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Image(
-                        painter = painterResource(id = R.drawable.institute_curriculum_map),
-                        contentDescription = "Official Institute Curriculum Map Poster",
-                        contentScale = ContentScale.FillWidth,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                    )
                 }
             }
         }

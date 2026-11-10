@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Diploma Quest"
+rootProject.name = "Excel ETA"
 
 include(":app")
