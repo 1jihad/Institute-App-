@@ -91,6 +91,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.BoxArchitectureType
 import com.example.data.BoxPracticeRoomType
 import com.example.data.LevelAssignment
 import com.example.data.MaterialCategory
@@ -106,6 +107,18 @@ import com.example.ui.theme.EtaGold
 import com.example.ui.theme.EtaNavy
 import com.example.ui.theme.EtaRed
 import java.io.InputStream
+
+private data class CourseSubFolderItem(
+    val id: String,
+    val emoji: String,
+    val title: String,
+    val arabicSubtitle: String,
+    val badgeText: String,
+    val description: String,
+    val accentColor: Color,
+    val targetSection: Int,
+    val targetRoomIndex: Int = 0
+)
 
 @Composable
 fun LevelDetailScreen(
@@ -136,14 +149,25 @@ fun LevelDetailScreen(
     onMarkStudyRoomDone: (Boolean) -> Unit = {},
     onSubmitRoomPracticeScore: (BoxPracticeRoomType, Int, List<String>) -> Unit = { _, _, _ -> }
 ) {
-    BackHandler(onBack = onBack)
-
     val level = node.level
     val trackColor = level.track.primaryColor
-    var selectedSection by remember(level.id) { mutableIntStateOf(initialSelectedTab.coerceIn(0, 2)) }
+    // -1 = Course Sub-Folders Explorer Grid; 0 = Room View; 1 = Flashcards & Notes; 2 = Results, Grades & Mistakes
+    var selectedSection by remember(level.id) {
+        mutableIntStateOf(if (initialSelectedTab == 2) 2 else -1)
+    }
+    var selectedRoomIdx by remember(level.id) { mutableIntStateOf(0) }
 
     LaunchedEffect(initialSelectedTab, level.id) {
-        selectedSection = initialSelectedTab.coerceIn(0, 2)
+        selectedSection = if (initialSelectedTab == 2) 2 else -1
+    }
+
+    // Back button steps up from Sub-Folder -> Course Sub-Folders Grid -> Diploma Courses Folder
+    BackHandler {
+        if (selectedSection != -1) {
+            selectedSection = -1
+        } else {
+            onBack()
+        }
     }
 
     val speechController = rememberOfflineSpeechController()
@@ -152,106 +176,350 @@ fun LevelDetailScreen(
     var showNoteEditorDialog by remember { mutableStateOf(false) }
     var editingNote by remember { mutableStateOf<StudyMaterial?>(null) }
 
+    val mistakeCount = node.progress.mistakeItems.size + node.progress.quizMistakeIdSet.size
+    val subFolders = remember(node, level.boxType, mistakeCount) {
+        when (level.boxType) {
+            BoxArchitectureType.GENERAL_4_ROOMS -> listOf(
+                CourseSubFolderItem(
+                    id = "folder_vocab",
+                    emoji = "📁",
+                    title = "Vocabulary",
+                    arabicSubtitle = "غرفة المفردات",
+                    badgeText = "${node.allVocabularyItems.size} Words",
+                    description = "In-app Vocabulary Bank, Audio Pronunciation & Teacher .xlsx / .csv Upload",
+                    accentColor = EtaNavy,
+                    targetSection = 0,
+                    targetRoomIndex = 0
+                ),
+                CourseSubFolderItem(
+                    id = "folder_grammar",
+                    emoji = "📂",
+                    title = "Grammar Rules",
+                    arabicSubtitle = "غرفة شرح القواعد",
+                    badgeText = if (node.progress.grammarRoomCompleted) "Completed ✓" else "Rules & Examples",
+                    description = level.grammarContent.ruleTitle,
+                    accentColor = EtaBlue,
+                    targetSection = 0,
+                    targetRoomIndex = 1
+                ),
+                CourseSubFolderItem(
+                    id = "folder_vocab_tests",
+                    emoji = "📝",
+                    title = "Vocabulary Tests",
+                    arabicSubtitle = "تطبيق المفردات والاختبارات",
+                    badgeText = if (node.progress.vocabPracticeBestScore > 0) "Best: ${node.progress.vocabPracticeBestScore}%" else "${node.effectiveVocabPracticeQuestions.size} Questions",
+                    description = "Interactive vocabulary practice & tests to earn stars",
+                    accentColor = Color(0xFF0D9488),
+                    targetSection = 0,
+                    targetRoomIndex = 2
+                ),
+                CourseSubFolderItem(
+                    id = "folder_grammar_tests",
+                    emoji = "🧪",
+                    title = "Grammar Tests",
+                    arabicSubtitle = "تطبيقات واختبارات القواعد",
+                    badgeText = if (node.progress.grammarPracticeBestScore > 0) "Best: ${node.progress.grammarPracticeBestScore}%" else "${level.grammarPracticeQuestions.size} Questions",
+                    description = "Interactive grammar exercises (Earn 2/3 ⭐ to unlock next Course)",
+                    accentColor = EtaRed,
+                    targetSection = 0,
+                    targetRoomIndex = 3
+                ),
+                CourseSubFolderItem(
+                    id = "folder_flashcards",
+                    emoji = "🗂️",
+                    title = "Flashcards & Notes",
+                    arabicSubtitle = "البطاقات والملاحظات",
+                    badgeText = "${node.studentNotes.size} Notes • ${node.studyReminders.size} Reminders",
+                    description = "Review flashcards, personal study notes & reminders",
+                    accentColor = Color(0xFF7C3AED),
+                    targetSection = 1
+                ),
+                CourseSubFolderItem(
+                    id = "folder_results",
+                    emoji = "📊",
+                    title = "Results & Mistakes",
+                    arabicSubtitle = "النتائج والدرجات والأخطاء",
+                    badgeText = if (node.progress.gradedByTeacher) "${node.progress.inClassGrade}% Avg" else "Grades & Feedback",
+                    description = "Read-only 4-skill grades, mistake corrections ($mistakeCount) & message teacher",
+                    accentColor = Color(0xFFD97706),
+                    targetSection = 2
+                )
+            )
+            BoxArchitectureType.SKILLS_RW_2_ROOMS -> listOf(
+                CourseSubFolderItem(
+                    id = "folder_rw_grammar",
+                    emoji = "📂",
+                    title = "Grammar Rules",
+                    arabicSubtitle = "غرفة شرح القواعد (RW)",
+                    badgeText = if (node.progress.grammarRoomCompleted) "Completed ✓" else "RW Rules",
+                    description = level.grammarContent.ruleTitle,
+                    accentColor = EtaNavy,
+                    targetSection = 0,
+                    targetRoomIndex = 0
+                ),
+                CourseSubFolderItem(
+                    id = "folder_rw_writing_tests",
+                    emoji = "✍️",
+                    title = "Writing & Sentence Tests",
+                    arabicSubtitle = "تطبيقات الكتابة والتركيب",
+                    badgeText = if (node.progress.rwPracticeBestScore > 0) "Best: ${node.progress.rwPracticeBestScore}%" else "${level.rwSentenceExercises.size} Exercises",
+                    description = "Sentence ordering, Nominal/Verbal formation & grammar tests",
+                    accentColor = EtaRed,
+                    targetSection = 0,
+                    targetRoomIndex = 1
+                ),
+                CourseSubFolderItem(
+                    id = "folder_rw_vocab",
+                    emoji = "📁",
+                    title = "Vocabulary Bank",
+                    arabicSubtitle = "بنك المفردات (.xlsx / .csv)",
+                    badgeText = "${node.allVocabularyItems.size} Words",
+                    description = "Course vocabulary bank, audio pronunciation & teacher sheet upload",
+                    accentColor = EtaBlue,
+                    targetSection = 0,
+                    targetRoomIndex = 2
+                ),
+                CourseSubFolderItem(
+                    id = "folder_flashcards",
+                    emoji = "🗂️",
+                    title = "Flashcards & Notes",
+                    arabicSubtitle = "البطاقات والملاحظات",
+                    badgeText = "${node.studentNotes.size} Notes • ${node.studyReminders.size} Reminders",
+                    description = "Review flashcards, personal study notes & reminders",
+                    accentColor = Color(0xFF7C3AED),
+                    targetSection = 1
+                ),
+                CourseSubFolderItem(
+                    id = "folder_results",
+                    emoji = "📊",
+                    title = "Results & Mistakes",
+                    arabicSubtitle = "النتائج والدرجات والأخطاء",
+                    badgeText = if (node.progress.gradedByTeacher) "${node.progress.inClassGrade}% Avg" else "Grades & Feedback",
+                    description = "Read-only 4-skill grades, mistake corrections ($mistakeCount) & message teacher",
+                    accentColor = Color(0xFFD97706),
+                    targetSection = 2
+                )
+            )
+            BoxArchitectureType.SKILLS_LS_2_ROOMS -> listOf(
+                CourseSubFolderItem(
+                    id = "folder_ls_listening",
+                    emoji = "🎧",
+                    title = "Listening & Dictation",
+                    arabicSubtitle = "غرفة الاستماع والتطبيقي المفرداتي",
+                    badgeText = if (node.progress.listeningPracticeBestScore > 0) "Best: ${node.progress.listeningPracticeBestScore}%" else "${level.listeningExercises.size} Passages",
+                    description = "Listen to audio passages, live dictation & save new vocabulary",
+                    accentColor = EtaBlue,
+                    targetSection = 0,
+                    targetRoomIndex = 0
+                ),
+                CourseSubFolderItem(
+                    id = "folder_ls_speaking",
+                    emoji = "🎙️",
+                    title = "Speaking & Voice Tests",
+                    arabicSubtitle = "غرفة التحدث والتفاعل الصوتي",
+                    badgeText = if (node.progress.speakingPracticeBestScore > 0) "Best: ${node.progress.speakingPracticeBestScore}%" else "${level.speakingPrompts.size} Voice Prompts",
+                    description = "Spoken audio questions with On-Device Speech Recognition & auto-scoring",
+                    accentColor = EtaRed,
+                    targetSection = 0,
+                    targetRoomIndex = 1
+                ),
+                CourseSubFolderItem(
+                    id = "folder_ls_vocab",
+                    emoji = "📁",
+                    title = "Vocabulary Bank",
+                    arabicSubtitle = "بنك المفردات (.xlsx / .csv)",
+                    badgeText = "${node.allVocabularyItems.size} Words",
+                    description = "Course vocabulary bank, audio pronunciation & teacher sheet upload",
+                    accentColor = EtaNavy,
+                    targetSection = 0,
+                    targetRoomIndex = 2
+                ),
+                CourseSubFolderItem(
+                    id = "folder_flashcards",
+                    emoji = "🗂️",
+                    title = "Flashcards & Notes",
+                    arabicSubtitle = "البطاقات والملاحظات",
+                    badgeText = "${node.studentNotes.size} Notes • ${node.studyReminders.size} Reminders",
+                    description = "Review flashcards, personal study notes & reminders",
+                    accentColor = Color(0xFF7C3AED),
+                    targetSection = 1
+                ),
+                CourseSubFolderItem(
+                    id = "folder_results",
+                    emoji = "📊",
+                    title = "Results & Mistakes",
+                    arabicSubtitle = "النتائج والدرجات والأخطاء",
+                    badgeText = if (node.progress.gradedByTeacher) "${node.progress.inClassGrade}% Avg" else "Grades & Feedback",
+                    description = "Read-only 4-skill grades, mistake corrections ($mistakeCount) & message teacher",
+                    accentColor = Color(0xFFD97706),
+                    targetSection = 2
+                )
+            )
+        }
+    }
+
+    val activeSubFolderTitle = when (selectedSection) {
+        0 -> subFolders.find { it.targetSection == 0 && it.targetRoomIndex == selectedRoomIdx }?.title ?: "Course Rooms"
+        1 -> "Flashcards & Notes"
+        2 -> "Results & Mistakes"
+        else -> null
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .testTag("level_detail_screen")
     ) {
-        // Compact Top Header Bar (Level Title, Notification Bell & 3 Stars)
+        // Top Header Bar (Course Folder Title, Notification Bell & 3 Stars)
         Surface(
             color = trackColor,
             contentColor = Color.White,
             shadowElevation = 2.dp
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.2f))
-                            .testTag("back_to_map_button")
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back to Adventure Map",
-                            tint = Color.White,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column {
-                        Text(
-                            text = "BOX ${level.orderIndex} OF 21 • ${level.boxType.title.uppercase()}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
-                        Text(
-                            text = "${level.badgeEmoji} ${level.title}",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = Color.White
-                        )
-                    }
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    // Quick Notification Bell inside unit header
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = Color.White.copy(alpha = 0.2f),
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .clickable(onClick = onOpenNotifications)
-                            .testTag("unit_header_notifications_button")
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        IconButton(
+                            onClick = {
+                                if (selectedSection != -1) {
+                                    selectedSection = -1
+                                } else {
+                                    onBack()
+                                }
+                            },
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.2f))
+                                .testTag("back_to_map_button")
                         ) {
                             Icon(
-                                imageVector = if (unreadNotificationsCount > 0) Icons.Default.NotificationsActive else Icons.Default.Notifications,
-                                contentDescription = "Unit Notifications",
-                                tint = if (unreadNotificationsCount > 0) EtaGold else Color.White,
-                                modifier = Modifier.size(14.dp)
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Up One Folder",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
                             )
-                            if (unreadNotificationsCount > 0) {
-                                Spacer(modifier = Modifier.width(3.dp))
-                                Text(
-                                    text = "$unreadNotificationsCount",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = EtaGold,
-                                    fontWeight = FontWeight.ExtraBold
-                                )
-                            }
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text(
+                                text = "COURSE BOX ${level.orderIndex} OF 21 • ${level.boxType.title.uppercase()}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White.copy(alpha = 0.9f)
+                            )
+                            Text(
+                                text = "📦 ${level.title}",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = Color.White
+                            )
                         }
                     }
 
                     Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color.White.copy(alpha = 0.2f))
-                            .padding(horizontal = 7.dp, vertical = 3.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        repeat(3) { idx ->
-                            Icon(
-                                imageVector = if (idx < node.starsEarned) Icons.Default.Star else Icons.Outlined.StarOutline,
-                                contentDescription = null,
-                                tint = if (idx < node.starsEarned) EtaGold else Color.White.copy(alpha = 0.6f),
-                                modifier = Modifier.size(15.dp)
+                        // Quick Notification Bell inside unit header
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = Color.White.copy(alpha = 0.2f),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .clickable(onClick = onOpenNotifications)
+                                .testTag("unit_header_notifications_button")
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = if (unreadNotificationsCount > 0) Icons.Default.NotificationsActive else Icons.Default.Notifications,
+                                    contentDescription = "Unit Notifications",
+                                    tint = if (unreadNotificationsCount > 0) EtaGold else Color.White,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                if (unreadNotificationsCount > 0) {
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text(
+                                        text = "$unreadNotificationsCount",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = EtaGold,
+                                        fontWeight = FontWeight.ExtraBold
+                                    )
+                                }
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.White.copy(alpha = 0.2f))
+                                .padding(horizontal = 7.dp, vertical = 3.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            repeat(3) { idx ->
+                                Icon(
+                                    imageVector = if (idx < node.starsEarned) Icons.Default.Star else Icons.Outlined.StarOutline,
+                                    contentDescription = null,
+                                    tint = if (idx < node.starsEarned) EtaGold else Color.White.copy(alpha = 0.6f),
+                                    modifier = Modifier.size(15.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Computer-Style Folder Path Breadcrumb Bar
+                Surface(
+                    color = Color.Black.copy(alpha = 0.18f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = "📁 ${level.track.title}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.85f),
+                            modifier = Modifier.clickable { onBack() }
+                        )
+                        Text(
+                            text = "›",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.65f)
+                        )
+                        Text(
+                            text = "📂 Box ${level.orderIndex}: ${level.title}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (activeSubFolderTitle == null) EtaGold else Color.White,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.clickable { selectedSection = -1 }
+                        )
+                        if (activeSubFolderTitle != null) {
+                            Text(
+                                text = "›",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White.copy(alpha = 0.65f)
+                            )
+                            Text(
+                                text = "📁 $activeSubFolderTitle",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = EtaGold,
+                                fontWeight = FontWeight.ExtraBold
                             )
                         }
                     }
@@ -284,45 +552,67 @@ fun LevelDetailScreen(
             }
         }
 
-        val mistakeCount = node.progress.mistakeItems.size + node.progress.quizMistakeIdSet.size
-        TabRow(
-            selectedTabIndex = selectedSection,
-            containerColor = MaterialTheme.colorScheme.surface
-        ) {
-            Tab(
-                selected = selectedSection == 0,
-                onClick = { selectedSection = 0 },
-                text = {
-                    Text(
-                        text = "Rooms (${level.boxType.roomCount})",
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                },
-                icon = { Icon(Icons.Default.AutoStories, contentDescription = null, modifier = Modifier.size(15.dp)) },
-                modifier = Modifier.testTag("tab_materials")
-            )
-            Tab(
-                selected = selectedSection == 1,
-                onClick = { selectedSection = 1 },
-                text = { Text("Flashcards & Notes", style = MaterialTheme.typography.labelLarge) },
-                icon = { Icon(Icons.Default.Quiz, contentDescription = null, modifier = Modifier.size(15.dp)) },
-                modifier = Modifier.testTag("tab_assignments")
-            )
-            Tab(
-                selected = selectedSection == 2,
-                onClick = { selectedSection = 2 },
-                text = {
-                    Text(
-                        text = if (mistakeCount > 0) "Grades & Mistakes ($mistakeCount)" else "Grades & Mistakes",
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                },
-                icon = { Icon(Icons.Default.School, contentDescription = null, modifier = Modifier.size(15.dp)) },
-                modifier = Modifier.testTag("tab_class_grade")
-            )
+        // Top Bar when inside a Sub-Folder to jump back to Course Folder Grid or switch sections
+        if (selectedSection != -1) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedButton(
+                        onClick = { selectedSection = -1 },
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("All ${level.title} Folders", style = MaterialTheme.typography.labelLarge)
+                    }
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        TextButton(
+                            onClick = { selectedSection = 0 },
+                            modifier = Modifier.testTag("tab_materials")
+                        ) {
+                            Text("Rooms", style = MaterialTheme.typography.labelMedium)
+                        }
+                        TextButton(
+                            onClick = { selectedSection = 1 },
+                            modifier = Modifier.testTag("tab_assignments")
+                        ) {
+                            Text("Flashcards", style = MaterialTheme.typography.labelMedium)
+                        }
+                        TextButton(
+                            onClick = { selectedSection = 2 },
+                            modifier = Modifier.testTag("tab_class_grade")
+                        ) {
+                            Text("Results", style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                }
+            }
         }
 
         when (selectedSection) {
+            -1 -> CourseSubFoldersExplorerGrid(
+                node = node,
+                subFolders = subFolders,
+                onOpenSubFolder = { folder ->
+                    selectedRoomIdx = folder.targetRoomIndex
+                    selectedSection = folder.targetSection
+                }
+            )
             0 -> Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -336,7 +626,8 @@ fun LevelDetailScreen(
                     onAddVocabWord = onAddVocabWord,
                     onDeleteVocabWord = onDeleteVocabWord,
                     onMarkStudyRoomDone = onMarkStudyRoomDone,
-                    onSubmitRoomPracticeScore = onSubmitRoomPracticeScore
+                    onSubmitRoomPracticeScore = onSubmitRoomPracticeScore,
+                    initialRoomIndex = selectedRoomIdx
                 )
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -385,6 +676,188 @@ fun LevelDetailScreen(
                 editingNote = null
             }
         )
+    }
+}
+
+@Composable
+private fun CourseSubFoldersExplorerGrid(
+    node: LevelNodeState,
+    subFolders: List<CourseSubFolderItem>,
+    onOpenSubFolder: (CourseSubFolderItem) -> Unit
+) {
+    val level = node.level
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("course_subfolders_grid"),
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = EtaNavy)
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "📂 ${level.title} • Course Folders",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = Color.White,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                            Text(
+                                text = "${level.boxType.arabicSubtitle} • Select a folder below to open:",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White.copy(alpha = 0.88f)
+                            )
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = Color.White.copy(alpha = 0.16f)
+                        ) {
+                            Text(
+                                text = "⭐ ${node.starsEarned}/3 Stars",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = EtaGold,
+                                fontWeight = FontWeight.ExtraBold,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = if (node.starsEarned >= 2) {
+                            "✅ 2/3 Stars Earned! Next Course Box (${(level.orderIndex + 1).coerceAtMost(21)}) is UNLOCKED."
+                        } else {
+                            "🎯 Complete the Practice & Tests folders with at least 2/3 Stars (⭐⭐) to unlock Course Box ${(level.orderIndex + 1).coerceAtMost(21)}."
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (node.starsEarned >= 2) Color(0xFF6EE7B7) else Color.White.copy(alpha = 0.85f)
+                    )
+                }
+            }
+        }
+
+        val rows = subFolders.chunked(2)
+        items(rows) { pair ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                pair.forEach { folder ->
+                    CourseFolderBoxCard(
+                        folder = folder,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onOpenSubFolder(folder) }
+                    )
+                }
+                if (pair.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CourseFolderBoxCard(
+    folder: CourseSubFolderItem,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    ElevatedCard(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .testTag(folder.id),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Folder Top Tab Bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(folder.accentColor.copy(alpha = 0.14f))
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = folder.emoji,
+                        fontSize = 20.sp
+                    )
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = folder.accentColor.copy(alpha = 0.18f)
+                    ) {
+                        Text(
+                            text = folder.badgeText,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = folder.accentColor,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = folder.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    text = folder.arabicSubtitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = folder.accentColor,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = folder.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    minLines = 2,
+                    maxLines = 3
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = folder.accentColor,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Open Folder ➔",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 6.dp)
+                    )
+                }
+            }
+        }
     }
 }
 

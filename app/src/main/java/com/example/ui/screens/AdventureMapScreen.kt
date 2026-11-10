@@ -1,8 +1,8 @@
 package com.example.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -11,8 +11,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,30 +25,34 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -57,13 +60,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,25 +74,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.R
 import com.example.data.BoxArchitectureType
 import com.example.data.CurriculumLevel
 import com.example.data.DiplomaTrack
@@ -101,8 +93,6 @@ import com.example.ui.theme.EtaBlue
 import com.example.ui.theme.EtaGold
 import com.example.ui.theme.EtaNavy
 import com.example.ui.theme.EtaRed
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.NotificationsActive
 
 @Composable
 fun AdventureMapScreen(
@@ -120,10 +110,22 @@ fun AdventureMapScreen(
 ) {
     var levelToUnlock by remember { mutableStateOf<CurriculumLevel?>(null) }
     var diplomaToUnlock by remember { mutableStateOf<DiplomaTrack?>(null) }
-    var showTeacherCodeSheet by remember { mutableStateOf(false) }
     var showProfileDialog by remember { mutableStateOf(false) }
     var showExamGoalDialog by remember { mutableStateOf(false) }
     var lastRevealedNode by remember { mutableStateOf<LevelNodeState?>(null) }
+
+    // Folder Explorer navigation state:
+    // true = at the root "All Diplomas" folder directory showing Diploma Folder boxes (Intermediate Diploma, Advanced Diploma, etc.)
+    // false = inside the selected Diploma folder showing its Course Boxes
+    var isShowingRootDiplomaFolders by remember { mutableStateOf(true) }
+    // Toggle between 2-column Box Grid and 1-column Folder List
+    var isGridBoxMode by remember { mutableStateOf(true) }
+
+    if (!isShowingRootDiplomaFolders) {
+        BackHandler {
+            isShowingRootDiplomaFolders = true
+        }
+    }
 
     if (uiState.newlyUnlockedLevelNode != null) {
         lastRevealedNode = uiState.newlyUnlockedLevelNode
@@ -142,22 +144,7 @@ fun AdventureMapScreen(
         }
     }
 
-    val mapListState = rememberLazyListState()
-
-    LaunchedEffect(uiState.newlyUnlockedLevelId, activeTrack) {
-        val unlockedId = uiState.newlyUnlockedLevelId ?: return@LaunchedEffect
-        val targetIndex = trackLevels.indexOfFirst { it.level.id == unlockedId }
-        if (targetIndex >= 0) {
-            // Item 0 is the diploma header banner, so offset by 1
-            mapListState.animateScrollToItem((targetIndex + 1).coerceAtLeast(0))
-        }
-    }
-
-    val nextDiplomaTrack = remember(activeTrack, uiState.isPtpRevealed) {
-        val entries = uiState.visibleDiplomaTracks
-        val idx = entries.indexOf(activeTrack)
-        if (idx in 0 until entries.lastIndex) entries[idx + 1] else null
-    }
+    val folderListState = rememberLazyListState()
 
     Column(
         modifier = Modifier
@@ -165,14 +152,14 @@ fun AdventureMapScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        activeTrack.primaryColor.copy(alpha = 0.07f),
+                        activeTrack.primaryColor.copy(alpha = 0.06f),
                         MaterialTheme.colorScheme.background,
-                        activeTrack.primaryColor.copy(alpha = 0.04f)
+                        activeTrack.primaryColor.copy(alpha = 0.03f)
                     )
                 )
             )
     ) {
-        // Sleek Branded Top HUD Bar (Student Edition with ETA + Colored Arch Logo)
+        // Top HUD Bar (Student Profile, Notifications, Role, XP, Stars, Badges)
         CompactBrandedTopHudBar(
             uiState = uiState,
             onEditProfile = { showProfileDialog = true },
@@ -188,20 +175,25 @@ fun AdventureMapScreen(
             onOpenNotifications = onOpenNotifications
         )
 
-        // Compact Diploma Selector Bar (Locked diplomas show lock icon and hide units)
-        CompactDiplomaSelectorRow(
+        // Computer-Style Folder Path & Diploma Selector Bar
+        FolderExplorerTopBar(
             uiState = uiState,
             selectedTrack = activeTrack,
-            onSelectTrack = { track ->
+            isShowingRootDiplomaFolders = isShowingRootDiplomaFolders,
+            isGridBoxMode = isGridBoxMode,
+            onOpenRootDiplomas = { isShowingRootDiplomaFolders = true },
+            onSelectDiplomaFolder = { track ->
                 if (uiState.isDiplomaUnlocked(track)) {
                     onSelectTrack(track)
+                    isShowingRootDiplomaFolders = false
                 } else {
                     diplomaToUnlock = track
                 }
-            }
+            },
+            onToggleGridList = { isGridBoxMode = !isGridBoxMode }
         )
 
-        // Smooth AnimatedVisibility reveal when a student enters a valid teacher code to unlock a module
+        // Banner reveal when a student unlocks a new course box via code or 2/3 stars
         AnimatedVisibility(
             visible = uiState.newlyUnlockedLevelNode != null,
             enter = fadeIn(animationSpec = tween(420)) +
@@ -236,88 +228,89 @@ fun AdventureMapScreen(
             }
         }
 
-        AnimatedVisibility(
-            visible = !isActiveTrackUnlocked,
-            enter = fadeIn(tween(300)) + scaleIn(initialScale = 0.95f),
-            exit = fadeOut(tween(250)) + scaleOut(targetScale = 0.92f)
-        ) {
+        if (isShowingRootDiplomaFolders) {
+            // ROOT FOLDER LEVEL: Diploma Folder Boxes (Intermediate Diploma, Advanced Diploma, Skills Courses, All 21 Boxes)
+            RootDiplomaFoldersDirectory(
+                uiState = uiState,
+                onOpenDiplomaFolder = { track ->
+                    if (uiState.isDiplomaUnlocked(track)) {
+                        onSelectTrack(track)
+                        isShowingRootDiplomaFolders = false
+                    } else {
+                        diplomaToUnlock = track
+                    }
+                }
+            )
+        } else if (!isActiveTrackUnlocked) {
             LockedDiplomaGateView(
                 track = activeTrack,
                 onEnterDiplomaCode = { diplomaToUnlock = activeTrack }
             )
-        }
-
-        AnimatedVisibility(
-            visible = isActiveTrackUnlocked,
-            enter = fadeIn(tween(450)) +
-                expandVertically(expandFrom = Alignment.Top, animationSpec = tween(450)) +
-                scaleIn(initialScale = 0.96f, animationSpec = tween(450)),
-            exit = fadeOut(tween(250)) + shrinkVertically(tween(250))
-        ) {
-            // Scrollable Game-Like Winding Learning Map
+        } else {
+            // SECOND FOLDER LEVEL: Courses (Boxes) inside the selected Diploma Folder
             LazyColumn(
-                state = mapListState,
+                state = folderListState,
                 modifier = Modifier
                     .fillMaxSize()
                     .testTag("adventure_map_list"),
-                contentPadding = PaddingValues(top = 4.dp, bottom = 64.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
-                    CompactDiplomaHeaderBanner(
+                    DiplomaFolderHeaderBanner(
                         track = activeTrack,
-                        trackLevels = trackLevels
+                        trackLevels = trackLevels,
+                        onBackToDiplomas = { isShowingRootDiplomaFolders = true }
                     )
                 }
 
-                itemsIndexed(
-                    items = trackLevels,
-                    key = { _, item -> item.level.id }
-                ) { index, nodeState ->
-                    val previousStage = if (index > 0) trackLevels[index - 1].level.stageGroup else null
-                    val isNewlyUnlocked = uiState.newlyUnlockedLevelId == nodeState.level.id
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .widthIn(max = 440.dp)
-                            .padding(horizontal = 12.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (nodeState.level.stageGroup != previousStage) {
-                            CompactStageDividerPill(
-                                stageTitle = nodeState.level.stageGroup,
-                                color = activeTrack.primaryColor
-                            )
+                if (isGridBoxMode) {
+                    val rows = trackLevels.chunked(2)
+                    items(
+                        items = rows,
+                        key = { pair -> pair.joinToString("_") { it.level.id } }
+                    ) { pair ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .widthIn(max = 640.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            pair.forEach { nodeState ->
+                                val isNewlyUnlocked = uiState.newlyUnlockedLevelId == nodeState.level.id
+                                CourseBoxFolderGridCard(
+                                    node = nodeState,
+                                    isNewlyUnlocked = isNewlyUnlocked,
+                                    modifier = Modifier.weight(1f),
+                                    onClickCourseBox = {
+                                        if (nodeState.isUnlocked) {
+                                            onOpenLevel(nodeState.level)
+                                        } else {
+                                            levelToUnlock = nodeState.level
+                                        }
+                                    }
+                                )
+                            }
+                            if (pair.size == 1) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
-
-                        GameMapPathStep(
-                            index = index,
+                    }
+                } else {
+                    items(
+                        items = trackLevels,
+                        key = { it.level.id }
+                    ) { nodeState ->
+                        val isNewlyUnlocked = uiState.newlyUnlockedLevelId == nodeState.level.id
+                        CourseBoxFolderListRowCard(
                             node = nodeState,
                             isNewlyUnlocked = isNewlyUnlocked,
-                            isLastInTrack = index == trackLevels.lastIndex,
-                            onClickNode = {
+                            onClickCourseBox = {
                                 if (nodeState.isUnlocked) {
                                     onOpenLevel(nodeState.level)
                                 } else {
                                     levelToUnlock = nodeState.level
-                                }
-                            }
-                        )
-                    }
-                }
-
-                if (nextDiplomaTrack != null) {
-                    item {
-                        val nextUnlocked = uiState.isDiplomaUnlocked(nextDiplomaTrack)
-                        NextDiplomaPortalCard(
-                            nextTrack = nextDiplomaTrack,
-                            isUnlocked = nextUnlocked,
-                            onClick = {
-                                if (nextUnlocked) {
-                                    onSelectTrack(nextDiplomaTrack)
-                                } else {
-                                    diplomaToUnlock = nextDiplomaTrack
                                 }
                             }
                         )
@@ -353,6 +346,7 @@ fun AdventureMapScreen(
                 onUnlockDiploma(targetTrack, code) { success ->
                     if (success) {
                         diplomaToUnlock = null
+                        isShowingRootDiplomaFolders = false
                     } else {
                         onError()
                     }
@@ -451,7 +445,6 @@ private fun CompactBrandedTopHudBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // Notification Bell with unread badge
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
@@ -532,66 +525,370 @@ private fun HudCounterChip(
 }
 
 @Composable
-private fun CompactDiplomaSelectorRow(
+private fun FolderExplorerTopBar(
     uiState: QuestUiState,
     selectedTrack: DiplomaTrack,
-    onSelectTrack: (DiplomaTrack) -> Unit
+    isShowingRootDiplomaFolders: Boolean,
+    isGridBoxMode: Boolean,
+    onOpenRootDiplomas: () -> Unit,
+    onSelectDiplomaFolder: (DiplomaTrack) -> Unit,
+    onToggleGridList: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 10.dp, vertical = 5.dp),
-        horizontalArrangement = Arrangement.spacedBy(5.dp)
-    ) {
-        uiState.visibleDiplomaTracks.forEach { track ->
-            val unlocked = uiState.isDiplomaUnlocked(track)
-            val isSelected = selectedTrack == track
-            val shortName = when (track) {
-                DiplomaTrack.INTERMEDIATE_DIPLOMA -> "Boxes 1–13"
-                DiplomaTrack.ADVANCED_DIPLOMA -> "Boxes 14–21"
-                DiplomaTrack.TOEFL_PREP -> "All 21 Boxes"
-                DiplomaTrack.PTP_PROGRAM -> "Skills 1–6"
-            }
+    val activeFolderName = when (selectedTrack) {
+        DiplomaTrack.INTERMEDIATE_DIPLOMA -> "Intermediate Diploma (Boxes 1–13)"
+        DiplomaTrack.ADVANCED_DIPLOMA -> "Advanced Diploma (Boxes 14–21)"
+        DiplomaTrack.TOEFL_PREP -> "All 21 Curriculum Boxes"
+        DiplomaTrack.PTP_PROGRAM -> "Skills Courses (Skills 1–6)"
+    }
 
-            Surface(
-                shape = RoundedCornerShape(50),
-                color = when {
-                    isSelected -> track.primaryColor
-                    unlocked -> MaterialTheme.colorScheme.surface
-                    else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-                },
-                border = androidx.compose.foundation.BorderStroke(
-                    width = 1.dp,
-                    color = if (unlocked) track.primaryColor.copy(alpha = 0.45f) else MaterialTheme.colorScheme.outlineVariant
-                ),
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 1.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Breadcrumb Path Row + Grid/List Toggle
+            Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .clickable { onSelectTrack(track) }
-                    .testTag("filter_${track.id}")
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .horizontalScroll(rememberScrollState())
                 ) {
-                    if (!unlocked) {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = if (isShowingRootDiplomaFolders) EtaNavy else EtaNavy.copy(alpha = 0.1f),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(onClick = onOpenRootDiplomas)
+                            .testTag("root_diplomas_folder_btn")
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Folder,
+                                contentDescription = null,
+                                tint = if (isShowingRootDiplomaFolders) EtaGold else EtaNavy,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = "All Diplomas",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = if (isShowingRootDiplomaFolders) Color.White else EtaNavy,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    if (!isShowingRootDiplomaFolders) {
+                        Text(
+                            text = "›",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = selectedTrack.primaryColor.copy(alpha = 0.12f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.FolderOpen,
+                                    contentDescription = null,
+                                    tint = selectedTrack.primaryColor,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Text(
+                                    text = activeFolderName,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = selectedTrack.primaryColor,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (!isShowingRootDiplomaFolders) {
+                    IconButton(
+                        onClick = onToggleGridList,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .testTag("toggle_box_view_mode_btn")
+                    ) {
                         Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Locked Diploma",
-                            tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(12.dp)
+                            imageVector = if (isGridBoxMode) Icons.AutoMirrored.Filled.ViewList else Icons.Default.GridView,
+                            contentDescription = if (isGridBoxMode) "Switch to Folder List" else "Switch to Box Grid",
+                            tint = EtaNavy,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
-                    Text(
-                        text = shortName,
-                        style = MaterialTheme.typography.labelLarge,
+                }
+            }
+
+            // Diploma Folder Quick-Switch Chips
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                val orderedTracks = listOf(
+                    DiplomaTrack.INTERMEDIATE_DIPLOMA,
+                    DiplomaTrack.ADVANCED_DIPLOMA,
+                    DiplomaTrack.PTP_PROGRAM,
+                    DiplomaTrack.TOEFL_PREP
+                )
+                orderedTracks.forEach { track ->
+                    val unlocked = uiState.isDiplomaUnlocked(track)
+                    val isSelected = !isShowingRootDiplomaFolders && selectedTrack == track
+                    val folderLabel = when (track) {
+                        DiplomaTrack.INTERMEDIATE_DIPLOMA -> "📂 Intermediate (1–13)"
+                        DiplomaTrack.ADVANCED_DIPLOMA -> "📂 Advanced (14–21)"
+                        DiplomaTrack.PTP_PROGRAM -> "📂 Skills (1–6)"
+                        DiplomaTrack.TOEFL_PREP -> "📂 All 21 Boxes"
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
                         color = when {
-                            isSelected -> Color.White
-                            unlocked -> track.primaryColor
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                            isSelected -> track.primaryColor
+                            unlocked -> MaterialTheme.colorScheme.surface
+                            else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+                        },
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = if (unlocked) track.primaryColor.copy(alpha = 0.45f) else MaterialTheme.colorScheme.outlineVariant
+                        ),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { onSelectDiplomaFolder(track) }
+                            .testTag("filter_${track.id}")
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            if (!unlocked) {
+                                Icon(
+                                    imageVector = Icons.Default.Lock,
+                                    contentDescription = "Locked Diploma",
+                                    tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
+                            Text(
+                                text = folderLabel,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = when {
+                                    isSelected -> Color.White
+                                    unlocked -> track.primaryColor
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Root Directory of Diploma Folders ("Intermediate Diploma -> Courses -> Vocabulary, Listening, Tests, Results").
+ */
+@Composable
+private fun RootDiplomaFoldersDirectory(
+    uiState: QuestUiState,
+    onOpenDiplomaFolder: (DiplomaTrack) -> Unit
+) {
+    val diplomaFolders = listOf(
+        Triple(
+            DiplomaTrack.INTERMEDIATE_DIPLOMA,
+            "الدبلوم المتوسط • الصناديق 1 إلى 13",
+            uiState.levels.filter { it.level.track == DiplomaTrack.INTERMEDIATE_DIPLOMA }
+        ),
+        Triple(
+            DiplomaTrack.ADVANCED_DIPLOMA,
+            "الدبلوم المتقدم • الصناديق 14 إلى 21",
+            uiState.levels.filter { it.level.track == DiplomaTrack.ADVANCED_DIPLOMA }
+        ),
+        Triple(
+            DiplomaTrack.PTP_PROGRAM,
+            "دورات المهارات الخاصة (كتابة واستماع وتحدث • Skills 1–6)",
+            uiState.levels.filter { it.level.boxType != BoxArchitectureType.GENERAL_4_ROOMS }
+        ),
+        Triple(
+            DiplomaTrack.TOEFL_PREP,
+            "جميع المستويات المعتمدة بالتتابع (21 صندوقاً)",
+            uiState.levels
+        )
+    )
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("diploma_root_folders_list"),
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = 640.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = EtaNavy)
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Text(
+                        text = "📁 Excel ETA • Diploma Folders",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Select a Diploma Folder to open its Course Boxes (Vocabulary, Grammar, Listening, Speaking, Tests & Results):",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.88f)
+                    )
+                }
+            }
+        }
+
+        items(diplomaFolders) { (track, arabicDesc, courses) ->
+            val unlockedCount = courses.count { it.isUnlocked }
+            val passedCount = courses.count { it.starsEarned >= 2 }
+            val earnedStars = courses.sumOf { it.starsEarned }
+            val maxStars = courses.size * 3
+            val sampleCourseNames = courses.take(4).joinToString(" • ") { it.level.title }
+
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .widthIn(max = 640.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .clickable { onOpenDiplomaFolder(track) }
+                    .testTag("diploma_folder_card_${track.id}"),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 3.dp)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    // Folder Top Header Bar
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(track.primaryColor)
+                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.FolderOpen,
+                                    contentDescription = null,
+                                    tint = EtaGold,
+                                    modifier = Modifier.size(26.dp)
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    Text(
+                                        text = track.title,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.ExtraBold
+                                    )
+                                    Text(
+                                        text = arabicDesc,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = Color.White.copy(alpha = 0.9f)
+                                    )
+                                }
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = Color.White.copy(alpha = 0.2f)
+                            ) {
+                                Text(
+                                    text = "${courses.size} Courses",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "📦 Includes: $sampleCourseNames...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "🔓 $unlockedCount/${courses.size} Open • ✅ $passedCount Passed",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = track.primaryColor,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = "⭐ $earnedStars/$maxStars Stars",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = EtaNavy,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        LinearProgressIndicator(
+                            progress = {
+                                if (courses.isEmpty()) 0f else passedCount.toFloat() / courses.size.toFloat()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(6.dp)
+                                .clip(RoundedCornerShape(50)),
+                            color = track.primaryColor,
+                            trackColor = track.primaryColor.copy(alpha = 0.14f)
+                        )
+                    }
                 }
             }
         }
@@ -599,78 +896,360 @@ private fun CompactDiplomaSelectorRow(
 }
 
 @Composable
-private fun CompactDiplomaHeaderBanner(
+private fun DiplomaFolderHeaderBanner(
     track: DiplomaTrack,
-    trackLevels: List<LevelNodeState>
+    trackLevels: List<LevelNodeState>,
+    onBackToDiplomas: () -> Unit
 ) {
-    val passedCount = trackLevels.count { it.isPassed }
+    val passedCount = trackLevels.count { it.starsEarned >= 2 }
+    val unlockedCount = trackLevels.count { it.isUnlocked }
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .widthIn(max = 420.dp)
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-        shape = RoundedCornerShape(14.dp),
+            .widthIn(max = 640.dp),
+        shape = RoundedCornerShape(16.dp),
         color = track.primaryColor
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = track.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.White
-                )
-                Text(
-                    text = "${trackLevels.size} Units • ${track.totalHours} Hrs Total",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.88f)
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                IconButton(
+                    onClick = onBackToDiplomas,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.18f))
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "All Diplomas",
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        text = "📂 ${track.title}",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                    Text(
+                        text = "${trackLevels.size} Course Boxes • $unlockedCount Open • Earn ⭐⭐ (2/3) to Unlock Next Box",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White.copy(alpha = 0.9f)
+                    )
+                }
             }
             Surface(
                 shape = RoundedCornerShape(8.dp),
                 color = Color.White.copy(alpha = 0.2f)
             ) {
                 Text(
-                    text = "$passedCount/${trackLevels.size} Done",
+                    text = "$passedCount/${trackLevels.size} Passed",
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.White,
-                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
         }
     }
 }
 
+/**
+ * 2-Column Computer Folder / Course Box Card for each of the 21 Courses.
+ */
 @Composable
-private fun CompactStageDividerPill(
-    stageTitle: String,
-    color: Color
+private fun CourseBoxFolderGridCard(
+    node: LevelNodeState,
+    isNewlyUnlocked: Boolean,
+    modifier: Modifier = Modifier,
+    onClickCourseBox: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp),
-        shape = RoundedCornerShape(50),
-        color = color.copy(alpha = 0.12f)
-    ) {
-        Text(
-            text = stageTitle,
-            style = MaterialTheme.typography.labelMedium,
-            color = color,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
+    val level = node.level
+    val boxColor = level.boxType.badgeColor
+    val isUnlocked = node.isUnlocked
+    val isPassed = node.starsEarned >= 2
+
+    val subFolderPreview = when (level.boxType) {
+        BoxArchitectureType.GENERAL_4_ROOMS -> "📁 Vocab • Grammar • Tests • Results"
+        BoxArchitectureType.SKILLS_RW_2_ROOMS -> "📁 Grammar • Writing Tests • Results"
+        BoxArchitectureType.SKILLS_LS_2_ROOMS -> "📁 Listening • Speaking • Results"
+    }
+
+    ElevatedCard(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .border(
+                width = if (isNewlyUnlocked) 2.dp else 1.dp,
+                color = when {
+                    isNewlyUnlocked -> EtaGold
+                    isPassed -> Color(0xFF10B981).copy(alpha = 0.6f)
+                    isUnlocked -> boxColor.copy(alpha = 0.45f)
+                    else -> MaterialTheme.colorScheme.outlineVariant
+                },
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable(onClick = onClickCourseBox)
+            .testTag("level_node_${level.orderIndex}"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = if (isUnlocked) {
+                MaterialTheme.colorScheme.surface
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+            }
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = if (isUnlocked) 3.dp else 1.dp
         )
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Folder Tab Header Bar: Box Number + 3-Star Rating
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        if (isUnlocked) boxColor else Color(0xFF64748B)
+                    )
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "BOX ${level.orderIndex}",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        repeat(3) { starIdx ->
+                            val filled = starIdx < node.starsEarned
+                            Icon(
+                                imageVector = if (filled) Icons.Default.Star else Icons.Outlined.StarOutline,
+                                contentDescription = null,
+                                tint = if (filled) EtaGold else Color.White.copy(alpha = 0.45f),
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (isUnlocked) boxColor.copy(alpha = 0.14f)
+                                else Color(0xFF94A3B8).copy(alpha = 0.2f)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isUnlocked) {
+                            Text(text = "📂", fontSize = 17.sp)
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Locked Box",
+                                tint = Color(0xFF64748B),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = level.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.ExtraBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = level.boxType.arabicSubtitle,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isUnlocked) boxColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                // Sub-Folders Inside This Course Box
+                Text(
+                    text = subFolderPreview,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = when {
+                        isPassed -> Color(0xFF10B981).copy(alpha = 0.14f)
+                        isUnlocked -> boxColor.copy(alpha = 0.12f)
+                        else -> MaterialTheme.colorScheme.surfaceVariant
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = when {
+                            isPassed -> "✅ Open Folder (${node.starsEarned}/3 ⭐)"
+                            isUnlocked -> "📂 Open Course Folder ➔"
+                            else -> "🔒 Need 2/3 ⭐ or Code"
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = when {
+                            isPassed -> Color(0xFF047857)
+                            isUnlocked -> boxColor
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 5.dp),
+                        maxLines = 1
+                    )
+                }
+            }
+        }
     }
 }
 
-private fun nodeOffsetX(index: Int): Dp {
-    return when (index % 4) {
-        0 -> 0.dp
-        1 -> (-50).dp
-        2 -> 0.dp
-        else -> 50.dp
+/**
+ * 1-Column Detailed Computer Folder Row Card for a Course Box.
+ */
+@Composable
+private fun CourseBoxFolderListRowCard(
+    node: LevelNodeState,
+    isNewlyUnlocked: Boolean,
+    onClickCourseBox: () -> Unit
+) {
+    val level = node.level
+    val boxColor = level.boxType.badgeColor
+    val isUnlocked = node.isUnlocked
+    val isPassed = node.starsEarned >= 2
+
+    val subFoldersDescription = when (level.boxType) {
+        BoxArchitectureType.GENERAL_4_ROOMS -> "Folders: 1. Vocabulary • 2. Grammar • 3. Vocab Tests • 4. Grammar Tests • Flashcards • Results"
+        BoxArchitectureType.SKILLS_RW_2_ROOMS -> "Folders: 1. Grammar Rules • 2. Writing & Sentence Tests • Vocabulary • Flashcards • Results"
+        BoxArchitectureType.SKILLS_LS_2_ROOMS -> "Folders: 1. Listening & Dictation • 2. Speaking & Voice Tests • Vocabulary • Flashcards • Results"
+    }
+
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .widthIn(max = 640.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .border(
+                width = if (isNewlyUnlocked) 2.dp else 1.dp,
+                color = if (isUnlocked) boxColor.copy(alpha = 0.45f) else MaterialTheme.colorScheme.outlineVariant,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable(onClick = onClickCourseBox)
+            .testTag("level_node_${level.orderIndex}"),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = if (isUnlocked) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (isUnlocked) boxColor else Color(0xFF94A3B8)),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isUnlocked) {
+                    Text(text = "📂", fontSize = 22.sp)
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "Locked Folder",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Box ${level.orderIndex}: ${level.title}",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                        repeat(3) { starIdx ->
+                            val filled = starIdx < node.starsEarned
+                            Icon(
+                                imageVector = if (filled) Icons.Default.Star else Icons.Outlined.StarOutline,
+                                contentDescription = null,
+                                tint = if (filled) EtaGold else Color(0xFF94A3B8),
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+                    }
+                }
+
+                Text(
+                    text = "${level.boxType.title} • ${level.boxType.arabicSubtitle}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (isUnlocked) boxColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Text(
+                    text = subFoldersDescription,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2
+                )
+            }
+        }
     }
 }
 
@@ -686,7 +1265,7 @@ private fun UnlockedModuleRevealBanner(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .widthIn(max = 460.dp)
+            .widthIn(max = 640.dp)
             .padding(horizontal = 12.dp, vertical = 6.dp)
             .testTag("unlocked_module_reveal_card"),
         shape = RoundedCornerShape(16.dp),
@@ -694,7 +1273,7 @@ private fun UnlockedModuleRevealBanner(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-        border = androidx.compose.foundation.BorderStroke(1.5.dp, trackColor)
+        border = BorderStroke(1.5.dp, trackColor)
     ) {
         Column(
             modifier = Modifier
@@ -723,15 +1302,11 @@ private fun UnlockedModuleRevealBanner(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
-                            .background(
-                                Brush.verticalGradient(
-                                    listOf(trackColor, trackColor.copy(alpha = 0.8f))
-                                )
-                            )
+                            .background(trackColor)
                             .border(2.dp, EtaGold, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = level.badgeEmoji, fontSize = 22.sp)
+                        Text(text = "📂", fontSize = 22.sp)
                     }
 
                     Spacer(modifier = Modifier.width(10.dp))
@@ -746,19 +1321,19 @@ private fun UnlockedModuleRevealBanner(
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Upgrading Code Verified • Module Unlocked!",
+                                text = "Course Box Unlocked!",
                                 style = MaterialTheme.typography.labelMedium,
                                 color = trackColor,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                         Text(
-                            text = "Level ${level.orderIndex}: ${level.title}",
+                            text = "Box ${level.orderIndex}: ${level.title}",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = "${level.hours} Hours • ${level.materials.size} Materials • ${level.assignments.size} Assignments",
+                            text = level.boxType.arabicSubtitle,
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -782,31 +1357,9 @@ private fun UnlockedModuleRevealBanner(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    level.focusSkills.take(3).forEach { skill ->
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = trackColor.copy(alpha = 0.12f)
-                        ) {
-                            Text(
-                                text = skill,
-                                style = MaterialTheme.typography.labelMedium,
-                                color = trackColor,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                maxLines = 1
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
                 Button(
                     onClick = onStartModule,
                     shape = RoundedCornerShape(10.dp),
@@ -823,303 +1376,10 @@ private fun UnlockedModuleRevealBanner(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Open Module",
+                        text = "Open Course Folder",
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun GameMapPathStep(
-    index: Int,
-    node: LevelNodeState,
-    isNewlyUnlocked: Boolean = false,
-    isLastInTrack: Boolean,
-    onClickNode: () -> Unit
-) {
-    val level = node.level
-    val trackColor = level.track.primaryColor
-    val currentOffset = nodeOffsetX(index)
-    val nextOffset = nodeOffsetX(index + 1)
-
-    val nodeScale by animateFloatAsState(
-        targetValue = when {
-            isNewlyUnlocked -> 1.08f
-            node.isUnlocked -> 1.0f
-            else -> 0.95f
-        },
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "node_unlock_scale"
-    )
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 1.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .offset(x = currentOffset)
-                    .scale(nodeScale)
-                    .clickable(onClick = onClickNode)
-                    .testTag("level_node_${level.orderIndex}")
-            ) {
-                // Smooth AnimatedVisibility reveal for the 3-Star rating bar when unlocked
-                AnimatedVisibility(
-                    visible = node.isUnlocked,
-                    enter = fadeIn(animationSpec = tween(420)) +
-                        expandVertically(animationSpec = tween(420)) +
-                        scaleIn(
-                            initialScale = 0.7f,
-                            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
-                        ),
-                    exit = fadeOut(animationSpec = tween(200)) + shrinkVertically(animationSpec = tween(200))
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 2.dp)
-                    ) {
-                        repeat(3) { starIdx ->
-                            val filled = starIdx < node.starsEarned
-                            Icon(
-                                imageVector = if (filled) Icons.Default.Star else Icons.Outlined.StarOutline,
-                                contentDescription = null,
-                                tint = if (filled) EtaGold else Color(0xFF94A3B8),
-                                modifier = Modifier.size(13.dp)
-                            )
-                        }
-                    }
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .shadow(
-                            elevation = if (isNewlyUnlocked) 8.dp else if (node.isUnlocked) 4.dp else 1.dp,
-                            shape = CircleShape
-                        )
-                        .clip(CircleShape)
-                        .background(
-                            when {
-                                node.isPassed -> Brush.verticalGradient(listOf(Color(0xFFFBBF24), Color(0xFFD97706)))
-                                node.isUnlocked -> Brush.verticalGradient(listOf(trackColor, trackColor.copy(alpha = 0.85f)))
-                                else -> Brush.verticalGradient(listOf(Color(0xFFCBD5E1), Color(0xFF94A3B8)))
-                            }
-                        )
-                        .border(
-                            width = if (isNewlyUnlocked) 3.dp else 2.5.dp,
-                            color = when {
-                                isNewlyUnlocked -> EtaGold
-                                node.isPassed -> Color(0xFFFEF3C7)
-                                node.isUnlocked -> Color.White
-                                else -> Color(0xFFE2E8F0)
-                            },
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (node.isUnlocked) {
-                        Text(
-                            text = level.badgeEmoji,
-                            fontSize = 22.sp
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "Locked Unit",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-
-                    if (node.isPassed) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .size(16.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF10B981))
-                                .border(1.2.dp, Color.White, CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Passed",
-                                tint = Color.White,
-                                modifier = Modifier.size(10.dp)
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(3.dp))
-
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    shadowElevation = if (isNewlyUnlocked) 4.dp else 1.dp,
-                    border = androidx.compose.foundation.BorderStroke(
-                        width = if (isNewlyUnlocked) 1.5.dp else 1.dp,
-                        color = when {
-                            isNewlyUnlocked -> EtaGold
-                            node.isUnlocked -> trackColor.copy(alpha = 0.35f)
-                            else -> MaterialTheme.colorScheme.outlineVariant
-                        }
-                    )
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
-                        Text(
-                            text = "Box ${level.orderIndex}: ${level.title}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        val boxStructureText = when (level.boxType) {
-                            BoxArchitectureType.GENERAL_4_ROOMS -> "4 Rooms (Vocab + Grammar)"
-                            BoxArchitectureType.SKILLS_RW_2_ROOMS -> "Skills RW (Grammar + Writing)"
-                            BoxArchitectureType.SKILLS_LS_2_ROOMS -> "Skills L&S (Listen + Speak)"
-                        }
-                        Text(
-                            text = if (node.isUnlocked) boxStructureText else "$boxStructureText • Tap for Code",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = if (node.isUnlocked) trackColor else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        // Smooth AnimatedVisibility reveal of the unlocked curriculum module summary pill
-                        AnimatedVisibility(
-                            visible = node.isUnlocked,
-                            enter = expandVertically(
-                                expandFrom = Alignment.Top,
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioLowBouncy,
-                                    stiffness = Spring.StiffnessMediumLow
-                                )
-                            ) + fadeIn(animationSpec = tween(420)),
-                            exit = shrinkVertically(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200))
-                        ) {
-                            Surface(
-                                modifier = Modifier.padding(top = 3.dp),
-                                shape = RoundedCornerShape(6.dp),
-                                color = if (isNewlyUnlocked) EtaGold.copy(alpha = 0.22f) else trackColor.copy(alpha = 0.10f)
-                            ) {
-                                Text(
-                                    text = when {
-                                        isNewlyUnlocked -> "✨ Newly Unlocked • Tap to Enter Box"
-                                        node.starsEarned >= 2 -> "⭐ ${node.starsEarned}/3 Stars • Next Box Open ✓"
-                                        else -> "Earn ⭐⭐ (2/3) to Unlock Box ${level.orderIndex + 1}"
-                                    },
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = if (isNewlyUnlocked) EtaNavy else trackColor,
-                                    fontWeight = if (isNewlyUnlocked) FontWeight.Bold else FontWeight.Medium,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!isLastInTrack) {
-            Canvas(
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(28.dp)
-            ) {
-                val centerX = size.width / 2f
-                val startX = centerX + currentOffset.toPx()
-                val endX = centerX + nextOffset.toPx()
-
-                val path = Path().apply {
-                    moveTo(startX, 0f)
-                    cubicTo(
-                        startX, size.height * 0.5f,
-                        endX, size.height * 0.5f,
-                        endX, size.height
-                    )
-                }
-
-                drawPath(
-                    path = path,
-                    color = if (node.isPassed) EtaGold.copy(alpha = 0.35f) else trackColor.copy(alpha = 0.16f),
-                    style = Stroke(width = 16f, cap = StrokeCap.Round)
-                )
-
-                drawPath(
-                    path = path,
-                    color = if (node.isPassed) EtaGold else trackColor.copy(alpha = 0.55f),
-                    style = Stroke(
-                        width = 6f,
-                        cap = StrokeCap.Round,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f), 0f)
-                    )
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun NextDiplomaPortalCard(
-    nextTrack: DiplomaTrack,
-    isUnlocked: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .widthIn(max = 340.dp)
-            .padding(horizontal = 20.dp, vertical = 10.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
-            .testTag("next_diploma_gate_${nextTrack.id}"),
-        shape = RoundedCornerShape(16.dp),
-        color = if (isUnlocked) nextTrack.primaryColor else MaterialTheme.colorScheme.surfaceVariant,
-        border = androidx.compose.foundation.BorderStroke(
-            width = 1.dp,
-            color = if (isUnlocked) nextTrack.primaryColor else MaterialTheme.colorScheme.outlineVariant
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = if (isUnlocked) Icons.Default.LockOpen else Icons.Default.Lock,
-                contentDescription = null,
-                tint = if (isUnlocked) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = if (isUnlocked) "Enter ${nextTrack.title}" else "${nextTrack.title} (Locked)",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (isUnlocked) Color.White else MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = if (isUnlocked) "Tap to explore units" else "Complete previous diploma or enter Upgrading Code",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (isUnlocked) Color.White.copy(alpha = 0.85f) else MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
     }
@@ -1166,7 +1426,7 @@ private fun LockedDiplomaGateView(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Units in ${track.title} are protected. Graduate from your current diploma or enter an Upgrading Code from Administration.",
+                    text = "Courses in ${track.title} are protected. Complete your previous diploma or enter an Upgrading Code from Administration.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -1211,7 +1471,7 @@ private fun LockedDiplomaUnlockDialog(
         text = {
             Column {
                 Text(
-                    text = "Enter the Upgrading Code from Administration for this diploma level:",
+                    text = "Enter the Upgrading Code from Administration for this diploma folder:",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -1268,15 +1528,15 @@ fun TeacherUnlockDialog(
         shape = RoundedCornerShape(20.dp),
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = level.badgeEmoji, fontSize = 20.sp)
+                Text(text = "📦", fontSize = 20.sp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = "Unlock ${level.title}",
+                        text = "Unlock Box ${level.orderIndex}: ${level.title}",
                         style = MaterialTheme.typography.headlineMedium
                     )
                     Text(
-                        text = "Level ${level.orderIndex} • ${level.hours} Hrs",
+                        text = "Earn 2/3 ⭐ in Box ${(level.orderIndex - 1).coerceAtLeast(1)} or enter Admin Code",
                         style = MaterialTheme.typography.labelMedium,
                         color = level.track.primaryColor
                     )
@@ -1286,7 +1546,7 @@ fun TeacherUnlockDialog(
         text = {
             Column {
                 Text(
-                    text = "Enter the Upgrading Code from Administration to access ${level.title}:",
+                    text = "To open ${level.title} directly, enter the Activation Code from Administration (or earn at least 2/3 Stars in the previous course box):",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -1296,9 +1556,9 @@ fun TeacherUnlockDialog(
                         codeInput = it.uppercase()
                         showError = false
                     },
-                    label = { Text("Upgrading Code") },
+                    label = { Text("Admin Activation Code") },
                     placeholder = {
-                        Text("Enter Upgrading Code from Administration")
+                        Text("Enter Admin Code")
                     },
                     singleLine = true,
                     isError = showError,
@@ -1310,7 +1570,7 @@ fun TeacherUnlockDialog(
                 if (showError) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Incorrect Upgrading Code. Please obtain your Upgrading Code from Administration.",
+                        text = "Incorrect Activation Code. Please check with Administration.",
                         style = MaterialTheme.typography.labelMedium,
                         color = EtaRed
                     )
@@ -1330,7 +1590,7 @@ fun TeacherUnlockDialog(
             ) {
                 Icon(imageVector = Icons.Default.LockOpen, contentDescription = null, modifier = Modifier.size(15.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Unlock")
+                Text("Unlock Box")
             }
         },
         dismissButton = {

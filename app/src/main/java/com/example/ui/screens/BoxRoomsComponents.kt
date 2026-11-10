@@ -462,26 +462,29 @@ fun BoxRoomsInteractiveView(
     onAddVocabWord: (String, String, String, String) -> Unit,
     onDeleteVocabWord: (String) -> Unit,
     onMarkStudyRoomDone: (Boolean) -> Unit,
-    onSubmitRoomPracticeScore: (BoxPracticeRoomType, Int, List<String>) -> Unit
+    onSubmitRoomPracticeScore: (BoxPracticeRoomType, Int, List<String>) -> Unit,
+    initialRoomIndex: Int = 0
 ) {
     val level = node.level
-    var activeRoomIndex by remember(level.id) { mutableIntStateOf(0) }
+    var activeRoomIndex by remember(level.id, initialRoomIndex) { mutableIntStateOf(initialRoomIndex) }
 
     val roomTabs = remember(level.boxType) {
         when (level.boxType) {
             BoxArchitectureType.GENERAL_4_ROOMS -> listOf(
                 "1. Vocabulary" to "المفردات",
                 "2. Grammar" to "شرح القواعد",
-                "3. Vocab Practice" to "تطبيق المفردات",
-                "4. Grammar Practice" to "تطبيقات القواعد"
+                "3. Vocab Tests" to "تطبيق المفردات",
+                "4. Grammar Tests" to "تطبيقات القواعد"
             )
             BoxArchitectureType.SKILLS_RW_2_ROOMS -> listOf(
                 "1. Grammar Rules" to "غرفة شرح القواعد",
-                "2. Writing & Sentences" to "تطبيقات الكتابة والتركيب"
+                "2. Writing & Sentences" to "تطبيقات الكتابة والتركيب",
+                "3. Vocabulary Bank" to "بنك المفردات"
             )
             BoxArchitectureType.SKILLS_LS_2_ROOMS -> listOf(
                 "1. Listening & Dictation" to "الاستماع والمفردات",
-                "2. Speaking & Voice" to "التحدث والتفاعل الصوتي"
+                "2. Speaking & Voice" to "التحدث والتفاعل الصوتي",
+                "3. Vocabulary Bank" to "بنك المفردات"
             )
         }
     }
@@ -492,75 +495,7 @@ fun BoxRoomsInteractiveView(
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // 3-Star Progression & Box Type Header Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = EtaNavy)
-        ) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "BOX ${level.orderIndex} OF 21 • ${level.boxType.title.uppercase(Locale.US)}",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = EtaGold,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = level.boxType.arabicSubtitle,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White
-                        )
-                    }
-
-                    // 3-Star Badge
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color.White.copy(alpha = 0.15f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(3.dp)
-                        ) {
-                            for (s in 1..3) {
-                                Icon(
-                                    imageVector = if (s <= node.starsEarned) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                                    contentDescription = null,
-                                    tint = if (s <= node.starsEarned) EtaGold else Color.White.copy(alpha = 0.45f),
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "${node.starsEarned}/3",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = Color.White,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = if (node.starsEarned >= 2) {
-                        "✅ 2/3 Stars Achieved! Next Box (${(level.orderIndex + 1).coerceAtMost(21)}) is UNLOCKED!"
-                    } else {
-                        "🎯 Minimum to unlock next Box: Earn at least 2/3 Stars (⭐⭐) in the practice rooms."
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (node.starsEarned >= 2) Color(0xFF6EE7B7) else Color.White.copy(alpha = 0.88f)
-                )
-            }
-        }
-
-        // Room Selector Pills (4 Rooms for General Boxes, 2 Rooms for Skills Boxes)
+        // Sub-Folder / Room Switcher Pills inside the Course Box
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -586,7 +521,7 @@ fun BoxRoomsInteractiveView(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = enTitle,
+                            text = "📁 $enTitle",
                             style = MaterialTheme.typography.labelLarge,
                             color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold
@@ -601,7 +536,7 @@ fun BoxRoomsInteractiveView(
             }
         }
 
-        // Render active room content based on BoxArchitectureType
+        // Render active room folder content based on BoxArchitectureType
         when (level.boxType) {
             BoxArchitectureType.GENERAL_4_ROOMS -> {
                 when (activeRoomIndex.coerceIn(0, 3)) {
@@ -622,7 +557,7 @@ fun BoxRoomsInteractiveView(
                         onGoToPractice = { activeRoomIndex = 3 }
                     )
                     2 -> InteractivePracticeQuizRoom(
-                        roomTitle = "Room 3 • Vocabulary Practice (تطبيق المفردات)",
+                        roomTitle = "Folder • Vocabulary Practice & Tests (تطبيق المفردات)",
                         roomSubtitle = "Includes your Box Vocabulary Bank & any uploaded Teacher .xlsx / .csv words!",
                         questions = node.effectiveVocabPracticeQuestions,
                         bestScore = node.progress.vocabPracticeBestScore,
@@ -632,7 +567,7 @@ fun BoxRoomsInteractiveView(
                         }
                     )
                     3 -> InteractivePracticeQuizRoom(
-                        roomTitle = "Room 4 • Grammar Practice (تطبيقات القواعد)",
+                        roomTitle = "Folder • Grammar Practice & Tests (تطبيقات القواعد)",
                         roomSubtitle = "Apply ${level.title} grammar rules to earn up to 3 Stars (2/3 unlocks next Box)!",
                         questions = level.grammarPracticeQuestions,
                         bestScore = node.progress.grammarPracticeBestScore,
@@ -645,7 +580,7 @@ fun BoxRoomsInteractiveView(
             }
 
             BoxArchitectureType.SKILLS_RW_2_ROOMS -> {
-                when (activeRoomIndex.coerceIn(0, 1)) {
+                when (activeRoomIndex.coerceIn(0, 2)) {
                     0 -> GrammarExplanationRoomView(
                         node = node,
                         speechController = speechController,
@@ -659,11 +594,21 @@ fun BoxRoomsInteractiveView(
                             onSubmitRoomPracticeScore(BoxPracticeRoomType.RW_SENTENCE_PRACTICE, pct, emptyList())
                         }
                     )
+                    2 -> InAppVocabularyBankRoom(
+                        node = node,
+                        speechController = speechController,
+                        onImportVocabStream = onImportVocabStream,
+                        onImportVocabCsvText = onImportVocabCsvText,
+                        onAddVocabWord = onAddVocabWord,
+                        onDeleteVocabWord = onDeleteVocabWord,
+                        onMarkRoomDone = { onMarkStudyRoomDone(true) },
+                        onGoToPractice = { activeRoomIndex = 1 }
+                    )
                 }
             }
 
             BoxArchitectureType.SKILLS_LS_2_ROOMS -> {
-                when (activeRoomIndex.coerceIn(0, 1)) {
+                when (activeRoomIndex.coerceIn(0, 2)) {
                     0 -> SkillsListeningAndVocabDictationRoom(
                         node = node,
                         speechController = speechController,
@@ -680,6 +625,16 @@ fun BoxRoomsInteractiveView(
                         onSubmitSpeakingScore = { pct ->
                             onSubmitRoomPracticeScore(BoxPracticeRoomType.SPEAKING_VOICE_QA, pct, emptyList())
                         }
+                    )
+                    2 -> InAppVocabularyBankRoom(
+                        node = node,
+                        speechController = speechController,
+                        onImportVocabStream = onImportVocabStream,
+                        onImportVocabCsvText = onImportVocabCsvText,
+                        onAddVocabWord = onAddVocabWord,
+                        onDeleteVocabWord = onDeleteVocabWord,
+                        onMarkRoomDone = { onMarkStudyRoomDone(true) },
+                        onGoToPractice = { activeRoomIndex = 0 }
                     )
                 }
             }

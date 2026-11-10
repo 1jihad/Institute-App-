@@ -41,10 +41,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.EmojiEvents
-import androidx.compose.material.icons.outlined.Explore
+import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -173,7 +173,7 @@ fun DiplomaQuestApp(
                             onClick = { questViewModel.selectTab(AppTab.ADVENTURE_MAP) },
                             icon = {
                                 Icon(
-                                    imageVector = if (uiState.activeTab == AppTab.ADVENTURE_MAP) Icons.Filled.Explore else Icons.Outlined.Explore,
+                                    imageVector = if (uiState.activeTab == AppTab.ADVENTURE_MAP) Icons.Filled.Folder else Icons.Outlined.Folder,
                                     contentDescription = stringResource(R.string.map_tab),
                                     modifier = Modifier.size(20.dp)
                                 )

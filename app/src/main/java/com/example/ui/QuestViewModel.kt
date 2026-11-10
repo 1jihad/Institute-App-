@@ -257,7 +257,7 @@ data class QuestUiState(
 }
 
 private data class LocalActionState(
-    val selectedTrackFilter: DiplomaTrack = DiplomaTrack.TOEFL_PREP,
+    val selectedTrackFilter: DiplomaTrack = DiplomaTrack.INTERMEDIATE_DIPLOMA,
     val activeTab: AppTab = AppTab.ADVENTURE_MAP,
     val openedLevelId: String? = null,
     val openedLevelInitialTab: Int = 0,
